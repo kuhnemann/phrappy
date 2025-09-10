@@ -1,20 +1,21 @@
 # pyproject.toml
 
 [build-system]
-requires = ["setuptools>=61.0.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
 
 [project]
 name = "phrappy"
 version = "0.0.1"
-description = "Unofficial Python Client for the Phrase TMS API."
+description = "Unofficial typed Python Client for the Phrase TMS (Memsource) API."
 readme = "README.md"
-authors = [{ name = "Henrik Kühnemann", email = "hello@yellownape.se" }]
+authors = [{ name = "Henrik Kühnemann", email = "hk@yellownape.se" }]
 license = { file = "LICENSE" }
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
+    "Typing :: Typed",
 ]
 keywords = ["phrase", "api", "translation", "localization", "tms"]
 dependencies = [
@@ -23,7 +24,7 @@ dependencies = [
 requires-python = ">=3.10"
 
 [project.optional-dependencies]
-dev = ["black", "bumpver", "isort", "pip-tools", "pytest"]
+dev = ["ruff>=0.12.11","pytest>=8","pytest-asyncio>=0.23","pytest-httpx>=0.30","pytest-recording>=0.13.1","python-dotenv>=1.1.0"]
 
 [project.urls]
 Homepage = "https://github.com/kuhnemann/phrappy"
@@ -43,5 +44,5 @@ push = true
     'version = "{version}"',
 ]
 
-"src/phrappy/__init__.py" = ["{version}"]
+"src/phrappy/_meta.py" = ["{version}"]
 

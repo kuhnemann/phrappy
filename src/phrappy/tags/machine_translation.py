@@ -1,52 +1,51 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Union, Any
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from ..client import SyncPhraseTMSClient
+    from ..client import Phrappy
 
-from ..models import (
-    MachineTranslateResponse,
-    TranslationRequestExtendedDto
-    
-)
+from ..models import MachineTranslateResponse, TranslationRequestExtendedDto
 
 
 class MachineTranslationOperations:
-    def __init__(self, client: SyncPhraseTMSClient):
+    def __init__(self, client: Phrappy):
         self.client = client
-
 
     def machine_translation(
         self,
-        translation_request_extended_dto: TranslationRequestExtendedDto,
         mt_settings_uid: str,
+        translation_request_extended_dto: Optional[
+            TranslationRequestExtendedDto | dict
+        ] = None,
         phrase_token: Optional[str] = None,
-) -> MachineTranslateResponse:
+    ) -> MachineTranslateResponse:
         """
         Operation id: machineTranslation
         Translate with MT
-        
-        :param translation_request_extended_dto: TranslationRequestExtendedDto (required), body. 
-        :param mt_settings_uid: str (required), path. 
-        
+
+        :param mt_settings_uid: str (required), path.
+        :param translation_request_extended_dto: Optional[TranslationRequestExtendedDto | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: MachineTranslateResponse
         """
+
         endpoint = f"/api2/v1/machineTranslations/{mt_settings_uid}/translate"
-        params = {
-            
-        }
-        headers = {
-            
-        }
+        if type(translation_request_extended_dto) is dict:
+            translation_request_extended_dto = (
+                TranslationRequestExtendedDto.model_validate(
+                    translation_request_extended_dto
+                )
+            )
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = translation_request_extended_dto
 
         r = self.client.make_request(
@@ -57,14 +56,7 @@ class MachineTranslationOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return MachineTranslateResponse(**r.json())
-        
-
-
-
-if __name__ == '__main__':
-    print("This module is not intended to be run directly.")
+        return MachineTranslateResponse.model_validate(r.json())

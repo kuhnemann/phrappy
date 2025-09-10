@@ -1,52 +1,43 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Union, Any
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from ..client import SyncPhraseTMSClient
+    from ..async_client import AsyncPhrappy
 
-from ..models import (
-    PageDtoVendorDto,
-    CreateVendorDto,
-    VendorDto,
-    DeleteVendorsDto
-    
-)
+from ..models import CreateVendorDto, DeleteVendorsDto, PageDtoVendorDto, VendorDto
 
 
 class VendorOperations:
-    def __init__(self, client: SyncPhraseTMSClient):
+    def __init__(self, client: AsyncPhrappy):
         self.client = client
-
 
     async def create_vendor(
         self,
-        create_vendor_dto: CreateVendorDto,
+        create_vendor_dto: Optional[CreateVendorDto | dict] = None,
         phrase_token: Optional[str] = None,
-) -> VendorDto:
+    ) -> VendorDto:
         """
         Operation id: createVendor
         Create vendor
-        
-        :param create_vendor_dto: CreateVendorDto (required), body. 
-        
+
+        :param create_vendor_dto: Optional[CreateVendorDto | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: VendorDto
         """
-        endpoint = f"/api2/v1/vendors"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        endpoint = "/api2/v1/vendors"
+        if type(create_vendor_dto) is dict:
+            create_vendor_dto = CreateVendorDto.model_validate(create_vendor_dto)
 
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = create_vendor_dto
 
         r = await self.client.make_request(
@@ -57,44 +48,40 @@ class VendorOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return VendorDto(**r.json())
-        
-
+        return VendorDto.model_validate(r.json())
 
     async def delete_vendors(
         self,
-        delete_vendors_dto: DeleteVendorsDto,
+        delete_vendors_dto: Optional[DeleteVendorsDto | dict] = None,
         phrase_token: Optional[str] = None,
-) -> None:
+    ) -> None:
         """
         Operation id: deleteVendors
         Delete vendors (batch)
-        
-        :param delete_vendors_dto: DeleteVendorsDto (required), body. 
-        
+
+        :param delete_vendors_dto: Optional[DeleteVendorsDto | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: None
         """
-        endpoint = f"/api2/v1/vendors"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        endpoint = "/api2/v1/vendors"
+        if type(delete_vendors_dto) is dict:
+            delete_vendors_dto = DeleteVendorsDto.model_validate(delete_vendors_dto)
 
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = delete_vendors_dto
 
-        r = await self.client.make_request(
+        await self.client.make_request(
             "DELETE",
             endpoint,
             phrase_token,
@@ -102,41 +89,35 @@ class VendorOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
         return
-        
-
 
     async def get_vendor(
         self,
         vendor_uid: str,
         phrase_token: Optional[str] = None,
-) -> VendorDto:
+    ) -> VendorDto:
         """
         Operation id: getVendor
         Get vendor
-        
-        :param vendor_uid: str (required), path. 
-        
+
+        :param vendor_uid: str (required), path.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: VendorDto
         """
+
         endpoint = f"/api2/v1/vendors/{vendor_uid}"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = await self.client.make_request(
@@ -147,13 +128,10 @@ class VendorOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return VendorDto(**r.json())
-        
-
+        return VendorDto.model_validate(r.json())
 
     async def list_vendors(
         self,
@@ -161,34 +139,28 @@ class VendorOperations:
         page_number: Optional[int] = 0,
         page_size: Optional[int] = 50,
         phrase_token: Optional[str] = None,
-) -> PageDtoVendorDto:
+    ) -> PageDtoVendorDto:
         """
         Operation id: listVendors
         List vendors
-        
+
         :param name: Optional[str] = None (optional), query. Name or the vendor, for filtering.
         :param page_number: Optional[int] = 0 (optional), query. Page number, starting with 0, default 0.
         :param page_size: Optional[int] = 50 (optional), query. Page size, accepts values between 1 and 50, default 50.
-        
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: PageDtoVendorDto
         """
-        endpoint = f"/api2/v1/vendors"
-        params = {
-            "pageNumber": page_number,
-            "pageSize": page_size,
-            "name": name
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        endpoint = "/api2/v1/vendors"
 
+        params = {"pageNumber": page_number, "pageSize": page_size, "name": name}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = await self.client.make_request(
@@ -199,14 +171,7 @@ class VendorOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return PageDtoVendorDto(**r.json())
-        
-
-
-
-if __name__ == '__main__':
-    print("This module is not intended to be run directly.")
+        return PageDtoVendorDto.model_validate(r.json())

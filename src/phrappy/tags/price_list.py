@@ -1,59 +1,102 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Union, Any
+from typing import TYPE_CHECKING, List, Optional
+import json
 
 if TYPE_CHECKING:
-    from ..client import SyncPhraseTMSClient
+    from ..client import Phrappy
 
 from ..models import (
     PageDtoTranslationPriceListDto,
-    TranslationPriceSetBulkDeleteDto,
     PageDtoTranslationPriceSetDto,
-    TranslationPriceSetBulkMinimumPricesDto,
-    TranslationPriceListDto,
+    PriceListForImport,
     TranslationPriceListCreateDto,
-    TranslationPriceSetListDto,
+    TranslationPriceListDto,
+    TranslationPriceSetBulkDeleteDto,
+    TranslationPriceSetBulkMinimumPricesDto,
     TranslationPriceSetBulkPricesDto,
-    TranslationPriceSetCreateDto
-    
+    TranslationPriceSetCreateDto,
+    TranslationPriceSetListDto,
 )
 
 
 class PriceListOperations:
-    def __init__(self, client: SyncPhraseTMSClient):
+    def __init__(self, client: Phrappy):
         self.client = client
 
+    def clone_price_list(
+        self,
+        price_list_uid: str,
+        phrase_token: Optional[str] = None,
+    ) -> TranslationPriceListDto:
+        """
+        Operation id: clonePriceList
+        Clone price list
+
+        :param price_list_uid: str (required), path.
+
+        :param phrase_token: string (optional) - if not supplied, client will look for token from init
+
+        :return: TranslationPriceListDto
+        """
+
+        endpoint = f"/api2/v1/priceLists/{price_list_uid}/clone"
+
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
+        files = None
+        content = None
+        payload = None
+
+        r = self.client.make_request(
+            "POST",
+            endpoint,
+            phrase_token,
+            params=params,
+            payload=payload,
+            files=files,
+            headers=headers,
+            content=content,
+        )
+
+        return TranslationPriceListDto.model_validate(r.json())
 
     def create_language_pair(
         self,
-        translation_price_set_create_dto: TranslationPriceSetCreateDto,
         price_list_uid: str,
+        translation_price_set_create_dto: Optional[
+            TranslationPriceSetCreateDto | dict
+        ] = None,
         phrase_token: Optional[str] = None,
-) -> TranslationPriceSetListDto:
+    ) -> TranslationPriceSetListDto:
         """
         Operation id: createLanguagePair
         Add language pairs
-        
-        :param translation_price_set_create_dto: TranslationPriceSetCreateDto (required), body. 
-        :param price_list_uid: str (required), path. 
-        
+
+        :param price_list_uid: str (required), path.
+        :param translation_price_set_create_dto: Optional[TranslationPriceSetCreateDto | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: TranslationPriceSetListDto
         """
+
         endpoint = f"/api2/v1/priceLists/{price_list_uid}/priceSets"
-        params = {
-            
-        }
-        headers = {
-            
-        }
+        if type(translation_price_set_create_dto) is dict:
+            translation_price_set_create_dto = (
+                TranslationPriceSetCreateDto.model_validate(
+                    translation_price_set_create_dto
+                )
+            )
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = translation_price_set_create_dto
 
         r = self.client.make_request(
@@ -64,41 +107,43 @@ class PriceListOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return TranslationPriceSetListDto(**r.json())
-        
-
+        return TranslationPriceSetListDto.model_validate(r.json())
 
     def create_price_list(
         self,
-        translation_price_list_create_dto: TranslationPriceListCreateDto,
+        translation_price_list_create_dto: Optional[
+            TranslationPriceListCreateDto | dict
+        ] = None,
         phrase_token: Optional[str] = None,
-) -> TranslationPriceListDto:
+    ) -> TranslationPriceListDto:
         """
         Operation id: createPriceList
         Create price list
-        
-        :param translation_price_list_create_dto: TranslationPriceListCreateDto (required), body. 
-        
+
+        :param translation_price_list_create_dto: Optional[TranslationPriceListCreateDto | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: TranslationPriceListDto
         """
-        endpoint = f"/api2/v1/priceLists"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        endpoint = "/api2/v1/priceLists"
+        if type(translation_price_list_create_dto) is dict:
+            translation_price_list_create_dto = (
+                TranslationPriceListCreateDto.model_validate(
+                    translation_price_list_create_dto
+                )
+            )
 
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = translation_price_list_create_dto
 
         r = self.client.make_request(
@@ -109,13 +154,10 @@ class PriceListOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return TranslationPriceListDto(**r.json())
-        
-
+        return TranslationPriceListDto.model_validate(r.json())
 
     def delete_language_pair(
         self,
@@ -123,34 +165,31 @@ class PriceListOperations:
         source_language: str,
         target_language: str,
         phrase_token: Optional[str] = None,
-) -> None:
+    ) -> None:
         """
         Operation id: deleteLanguagePair
         Remove language pair
-        
-        :param price_list_uid: str (required), path. 
-        :param source_language: str (required), path. 
-        :param target_language: str (required), path. 
-        
+
+        :param price_list_uid: str (required), path.
+        :param source_language: str (required), path.
+        :param target_language: str (required), path.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: None
         """
+
         endpoint = f"/api2/v1/priceLists/{price_list_uid}/priceSets/{source_language}/{target_language}"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
-        r = self.client.make_request(
+        self.client.make_request(
             "DELETE",
             endpoint,
             phrase_token,
@@ -158,46 +197,48 @@ class PriceListOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
         return
-        
-
 
     def delete_language_pairs(
         self,
-        translation_price_set_bulk_delete_dto: TranslationPriceSetBulkDeleteDto,
         price_list_uid: str,
+        translation_price_set_bulk_delete_dto: Optional[
+            TranslationPriceSetBulkDeleteDto | dict
+        ] = None,
         phrase_token: Optional[str] = None,
-) -> None:
+    ) -> None:
         """
         Operation id: deleteLanguagePairs
         Remove language pairs
-        
-        :param translation_price_set_bulk_delete_dto: TranslationPriceSetBulkDeleteDto (required), body. 
-        :param price_list_uid: str (required), path. 
-        
+
+        :param price_list_uid: str (required), path.
+        :param translation_price_set_bulk_delete_dto: Optional[TranslationPriceSetBulkDeleteDto | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: None
         """
+
         endpoint = f"/api2/v1/priceLists/{price_list_uid}/priceSets"
-        params = {
-            
-        }
-        headers = {
-            
-        }
+        if type(translation_price_set_bulk_delete_dto) is dict:
+            translation_price_set_bulk_delete_dto = (
+                TranslationPriceSetBulkDeleteDto.model_validate(
+                    translation_price_set_bulk_delete_dto
+                )
+            )
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = translation_price_set_bulk_delete_dto
 
-        r = self.client.make_request(
+        self.client.make_request(
             "DELETE",
             endpoint,
             phrase_token,
@@ -205,44 +246,38 @@ class PriceListOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
         return
-        
-
 
     def delete_price_list(
         self,
         price_list_uid: str,
         phrase_token: Optional[str] = None,
-) -> None:
+    ) -> None:
         """
         Operation id: deletePriceList
         Delete price list
-        
-        :param price_list_uid: str (required), path. 
-        
+
+        :param price_list_uid: str (required), path.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: None
         """
+
         endpoint = f"/api2/v1/priceLists/{price_list_uid}"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
-        r = self.client.make_request(
+        self.client.make_request(
             "DELETE",
             endpoint,
             phrase_token,
@@ -250,13 +285,51 @@ class PriceListOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
         return
-        
 
+    def export_price_list(
+        self,
+        price_list_uid: str,
+        phrase_token: Optional[str] = None,
+    ) -> bytes:
+        """
+        Operation id: exportPriceList
+        Export translation price list
+
+        :param price_list_uid: str (required), path.
+
+        :param phrase_token: string (optional) - if not supplied, client will look for token from init
+
+        !!! N.B.: API docs have no 200 range response declared, so falling back to returning the raw bytes from the API response.
+
+        :return: bytes
+        """
+
+        endpoint = f"/api2/v1/priceLists/{price_list_uid}/export"
+
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
+        files = None
+        content = None
+        payload = None
+
+        r = self.client.make_request(
+            "GET",
+            endpoint,
+            phrase_token,
+            params=params,
+            payload=payload,
+            files=files,
+            headers=headers,
+            content=content,
+        )
+
+        return r.content
 
     def get_list_of_price_list(
         self,
@@ -264,34 +337,28 @@ class PriceListOperations:
         page_number: Optional[int] = 0,
         page_size: Optional[int] = 50,
         phrase_token: Optional[str] = None,
-) -> PageDtoTranslationPriceListDto:
+    ) -> PageDtoTranslationPriceListDto:
         """
         Operation id: getListOfPriceList
         List price lists
-        
+
         :param name: Optional[str] = None (optional), query. Filter for name.
         :param page_number: Optional[int] = 0 (optional), query. Page number, starting with 0, default 0.
         :param page_size: Optional[int] = 50 (optional), query. Page size, accepts values between 1 and 50, default 50.
-        
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: PageDtoTranslationPriceListDto
         """
-        endpoint = f"/api2/v1/priceLists"
-        params = {
-            "pageNumber": page_number,
-            "pageSize": page_size,
-            "name": name
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        endpoint = "/api2/v1/priceLists"
 
+        params = {"pageNumber": page_number, "pageSize": page_size, "name": name}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = self.client.make_request(
@@ -302,41 +369,35 @@ class PriceListOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return PageDtoTranslationPriceListDto(**r.json())
-        
-
+        return PageDtoTranslationPriceListDto.model_validate(r.json())
 
     def get_price_list(
         self,
         price_list_uid: str,
         phrase_token: Optional[str] = None,
-) -> TranslationPriceListDto:
+    ) -> TranslationPriceListDto:
         """
         Operation id: getPriceList
         Get price list
-        
-        :param price_list_uid: str (required), path. 
-        
+
+        :param price_list_uid: str (required), path.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: TranslationPriceListDto
         """
+
         endpoint = f"/api2/v1/priceLists/{price_list_uid}"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = self.client.make_request(
@@ -347,13 +408,10 @@ class PriceListOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return TranslationPriceListDto(**r.json())
-        
-
+        return TranslationPriceListDto.model_validate(r.json())
 
     def get_prices_with_workflow_steps(
         self,
@@ -363,37 +421,35 @@ class PriceListOperations:
         source_languages: Optional[List[str]] = None,
         target_languages: Optional[List[str]] = None,
         phrase_token: Optional[str] = None,
-) -> PageDtoTranslationPriceSetDto:
+    ) -> PageDtoTranslationPriceSetDto:
         """
         Operation id: getPricesWithWorkflowSteps
         List price sets
-        
-        :param price_list_uid: str (required), path. 
+
+        :param price_list_uid: str (required), path.
         :param page_number: Optional[int] = 0 (optional), query. Page number, starting with 0, default 0.
         :param page_size: Optional[int] = 50 (optional), query. Page size, accepts values between 1 and 50, default 50.
-        :param source_languages: Optional[List[str]] = None (optional), query. 
-        :param target_languages: Optional[List[str]] = None (optional), query. 
-        
+        :param source_languages: Optional[List[str]] = None (optional), query.
+        :param target_languages: Optional[List[str]] = None (optional), query.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: PageDtoTranslationPriceSetDto
         """
+
         endpoint = f"/api2/v1/priceLists/{price_list_uid}/priceSets"
+
         params = {
             "pageNumber": page_number,
             "pageSize": page_size,
             "sourceLanguages": source_languages,
-            "targetLanguages": target_languages
-            
-        }
-        headers = {
-            
+            "targetLanguages": target_languages,
         }
 
-        content = None
-
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = self.client.make_request(
@@ -404,43 +460,100 @@ class PriceListOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return PageDtoTranslationPriceSetDto(**r.json())
-        
+        return PageDtoTranslationPriceSetDto.model_validate(r.json())
 
+    def import_price_list(
+        self,
+        file: bytes,
+        price_list_uid: str,
+        content_type: str = "multipart/form-data",
+        filename: Optional[str] = None,
+        phrase_token: Optional[str] = None,
+    ) -> PriceListForImport:
+        """
+        Operation id: importPriceList
+        Import translation price list
+
+        :param file: bytes (required), formData.
+        :param price_list_uid: str (required), path.
+        :param content_type: str = "multipart/form-data" (required), header.
+
+        :param filename: Optional name for the uploaded file; defaults to field name.
+        :param phrase_token: string (optional) - if not supplied, client will look for token from init
+
+        :return: PriceListForImport
+        """
+
+        endpoint = f"/api2/v1/priceLists/{price_list_uid}/import"
+
+        params = {}
+
+        headers = {
+            "Content-Type": (
+                content_type.model_dump_json()
+                if hasattr(content_type, "model_dump_json")
+                else (
+                    json.dumps(content_type)
+                    if False and not isinstance(content_type, str)
+                    else str(content_type)
+                )
+            )
+        }
+        headers = {k: v for k, v in headers.items() if v is not None}
+        files = {"file": (filename or "file", file)}
+        payload = None
+        content = None
+
+        r = self.client.make_request(
+            "POST",
+            endpoint,
+            phrase_token,
+            params=params,
+            payload=payload,
+            files=files,
+            headers=headers,
+            content=content,
+        )
+
+        return PriceListForImport.model_validate(r.json())
 
     def set_minimum_price_for_set(
         self,
-        translation_price_set_bulk_minimum_prices_dto: TranslationPriceSetBulkMinimumPricesDto,
         price_list_uid: str,
+        translation_price_set_bulk_minimum_prices_dto: Optional[
+            TranslationPriceSetBulkMinimumPricesDto | dict
+        ] = None,
         phrase_token: Optional[str] = None,
-) -> TranslationPriceListDto:
+    ) -> TranslationPriceListDto:
         """
         Operation id: setMinimumPriceForSet
         Edit minimum prices
-        
-        :param translation_price_set_bulk_minimum_prices_dto: TranslationPriceSetBulkMinimumPricesDto (required), body. 
-        :param price_list_uid: str (required), path. 
-        
+
+        :param price_list_uid: str (required), path.
+        :param translation_price_set_bulk_minimum_prices_dto: Optional[TranslationPriceSetBulkMinimumPricesDto | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: TranslationPriceListDto
         """
+
         endpoint = f"/api2/v1/priceLists/{price_list_uid}/priceSets/minimumPrices"
-        params = {
-            
-        }
-        headers = {
-            
-        }
+        if type(translation_price_set_bulk_minimum_prices_dto) is dict:
+            translation_price_set_bulk_minimum_prices_dto = (
+                TranslationPriceSetBulkMinimumPricesDto.model_validate(
+                    translation_price_set_bulk_minimum_prices_dto
+                )
+            )
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = translation_price_set_bulk_minimum_prices_dto
 
         r = self.client.make_request(
@@ -451,43 +564,45 @@ class PriceListOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return TranslationPriceListDto(**r.json())
-        
-
+        return TranslationPriceListDto.model_validate(r.json())
 
     def set_prices(
         self,
-        translation_price_set_bulk_prices_dto: TranslationPriceSetBulkPricesDto,
         price_list_uid: str,
+        translation_price_set_bulk_prices_dto: Optional[
+            TranslationPriceSetBulkPricesDto | dict
+        ] = None,
         phrase_token: Optional[str] = None,
-) -> TranslationPriceListDto:
+    ) -> TranslationPriceListDto:
         """
         Operation id: setPrices
         Edit prices
         If object contains only price, all languages and workflow steps will be updated
-        :param translation_price_set_bulk_prices_dto: TranslationPriceSetBulkPricesDto (required), body. 
-        :param price_list_uid: str (required), path. 
-        
+        :param price_list_uid: str (required), path.
+        :param translation_price_set_bulk_prices_dto: Optional[TranslationPriceSetBulkPricesDto | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: TranslationPriceListDto
         """
+
         endpoint = f"/api2/v1/priceLists/{price_list_uid}/priceSets/prices"
-        params = {
-            
-        }
-        headers = {
-            
-        }
+        if type(translation_price_set_bulk_prices_dto) is dict:
+            translation_price_set_bulk_prices_dto = (
+                TranslationPriceSetBulkPricesDto.model_validate(
+                    translation_price_set_bulk_prices_dto
+                )
+            )
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = translation_price_set_bulk_prices_dto
 
         r = self.client.make_request(
@@ -498,43 +613,45 @@ class PriceListOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return TranslationPriceListDto(**r.json())
-        
-
+        return TranslationPriceListDto.model_validate(r.json())
 
     def update_price_list(
         self,
-        translation_price_list_create_dto: TranslationPriceListCreateDto,
         price_list_uid: str,
+        translation_price_list_create_dto: Optional[
+            TranslationPriceListCreateDto | dict
+        ] = None,
         phrase_token: Optional[str] = None,
-) -> TranslationPriceListDto:
+    ) -> TranslationPriceListDto:
         """
         Operation id: updatePriceList
         Update price list
-        
-        :param translation_price_list_create_dto: TranslationPriceListCreateDto (required), body. 
-        :param price_list_uid: str (required), path. 
-        
+
+        :param price_list_uid: str (required), path.
+        :param translation_price_list_create_dto: Optional[TranslationPriceListCreateDto | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: TranslationPriceListDto
         """
+
         endpoint = f"/api2/v1/priceLists/{price_list_uid}"
-        params = {
-            
-        }
-        headers = {
-            
-        }
+        if type(translation_price_list_create_dto) is dict:
+            translation_price_list_create_dto = (
+                TranslationPriceListCreateDto.model_validate(
+                    translation_price_list_create_dto
+                )
+            )
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = translation_price_list_create_dto
 
         r = self.client.make_request(
@@ -545,14 +662,7 @@ class PriceListOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return TranslationPriceListDto(**r.json())
-        
-
-
-
-if __name__ == '__main__':
-    print("This module is not intended to be run directly.")
+        return TranslationPriceListDto.model_validate(r.json())

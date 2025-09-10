@@ -1,50 +1,41 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Union, Any
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from ..client import SyncPhraseTMSClient
+    from ..client import Phrappy
 
-from ..models import (
-    LanguageListDto
-    
-)
+from ..models import LanguageListDto
 
 
 class SupportedLanguagesOperations:
-    def __init__(self, client: SyncPhraseTMSClient):
+    def __init__(self, client: Phrappy):
         self.client = client
-
 
     def list_of_languages(
         self,
         active: Optional[bool] = None,
         phrase_token: Optional[str] = None,
-) -> LanguageListDto:
+    ) -> LanguageListDto:
         """
         Operation id: listOfLanguages
         List supported languages
-        
-        :param active: Optional[bool] = None (optional), query. 
-        
+
+        :param active: Optional[bool] = None (optional), query.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: LanguageListDto
         """
-        endpoint = f"/api2/v1/languages"
-        params = {
-            "active": active
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        endpoint = "/api2/v1/languages"
 
+        params = {"active": active}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = self.client.make_request(
@@ -55,14 +46,7 @@ class SupportedLanguagesOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return LanguageListDto(**r.json())
-        
-
-
-
-if __name__ == '__main__':
-    print("This module is not intended to be run directly.")
+        return LanguageListDto.model_validate(r.json())

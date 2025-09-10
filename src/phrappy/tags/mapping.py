@@ -1,52 +1,43 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Union, Any
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from ..client import SyncPhraseTMSClient
+    from ..client import Phrappy
 
-from ..models import (
-    TaskMappingDto
-    
-)
+from ..models import TaskMappingDto
 
 
 class MappingOperations:
-    def __init__(self, client: SyncPhraseTMSClient):
+    def __init__(self, client: Phrappy):
         self.client = client
-
 
     def get_mapping_for_task(
         self,
         id: str,
         workflow_level: Optional[int] = 1,
         phrase_token: Optional[str] = None,
-) -> TaskMappingDto:
+    ) -> TaskMappingDto:
         """
         Operation id: getMappingForTask
         Returns mapping for taskId (mxliff)
-        
-        :param id: str (required), path. 
-        :param workflow_level: Optional[int] = 1 (optional), query. 
-        
+
+        :param id: str (required), path.
+        :param workflow_level: Optional[int] = 1 (optional), query.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: TaskMappingDto
         """
+
         endpoint = f"/api2/v1/mappings/tasks/{id}"
-        params = {
-            "workflowLevel": workflow_level
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        params = {"workflowLevel": workflow_level}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = self.client.make_request(
@@ -57,14 +48,7 @@ class MappingOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return TaskMappingDto(**r.json())
-        
-
-
-
-if __name__ == '__main__':
-    print("This module is not intended to be run directly.")
+        return TaskMappingDto.model_validate(r.json())

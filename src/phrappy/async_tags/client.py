@@ -1,51 +1,43 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Union, Any
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from ..client import SyncPhraseTMSClient
+    from ..async_client import AsyncPhrappy
 
-from ..models import (
-    ClientDto,
-    PageDtoClientDto,
-    ClientEditDto
-    
-)
+from ..models import ClientDto, ClientEditDto, PageDtoClientDto
 
 
 class ClientOperations:
-    def __init__(self, client: SyncPhraseTMSClient):
+    def __init__(self, client: AsyncPhrappy):
         self.client = client
-
 
     async def create_client(
         self,
-        client_edit_dto: ClientEditDto,
+        client_edit_dto: ClientEditDto | dict,
         phrase_token: Optional[str] = None,
-) -> ClientDto:
+    ) -> ClientDto:
         """
         Operation id: createClient
         Create client
-        
-        :param client_edit_dto: ClientEditDto (required), body. 
-        
+
+        :param client_edit_dto: ClientEditDto | dict (required), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: ClientDto
         """
-        endpoint = f"/api2/v1/clients"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        endpoint = "/api2/v1/clients"
+        if type(client_edit_dto) is dict:
+            client_edit_dto = ClientEditDto.model_validate(client_edit_dto)
 
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = client_edit_dto
 
         r = await self.client.make_request(
@@ -56,44 +48,38 @@ class ClientOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return ClientDto(**r.json())
-        
-
+        return ClientDto.model_validate(r.json())
 
     async def delete_client(
         self,
         client_uid: str,
         phrase_token: Optional[str] = None,
-) -> None:
+    ) -> None:
         """
         Operation id: deleteClient
         Delete client
-        
-        :param client_uid: str (required), path. 
-        
+
+        :param client_uid: str (required), path.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: None
         """
+
         endpoint = f"/api2/v1/clients/{client_uid}"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
-        r = await self.client.make_request(
+        await self.client.make_request(
             "DELETE",
             endpoint,
             phrase_token,
@@ -101,41 +87,35 @@ class ClientOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
         return
-        
-
 
     async def get_client(
         self,
         client_uid: str,
         phrase_token: Optional[str] = None,
-) -> ClientDto:
+    ) -> ClientDto:
         """
         Operation id: getClient
         Get client
-        
-        :param client_uid: str (required), path. 
-        
+
+        :param client_uid: str (required), path.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: ClientDto
         """
+
         endpoint = f"/api2/v1/clients/{client_uid}"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = await self.client.make_request(
@@ -146,13 +126,10 @@ class ClientOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return ClientDto(**r.json())
-        
-
+        return ClientDto.model_validate(r.json())
 
     async def list_clients(
         self,
@@ -163,40 +140,38 @@ class ClientOperations:
         page_size: Optional[int] = 50,
         sort: Optional[str] = "NAME",
         phrase_token: Optional[str] = None,
-) -> PageDtoClientDto:
+    ) -> PageDtoClientDto:
         """
         Operation id: listClients
         List clients
-        
+
         :param created_by: Optional[str] = None (optional), query. Uid of user.
         :param name: Optional[str] = None (optional), query. Unique name of the Client.
-        :param order: Optional[str] = "ASC" (optional), query. 
+        :param order: Optional[str] = "ASC" (optional), query.
         :param page_number: Optional[int] = 0 (optional), query. Page number, starting with 0, default 0.
         :param page_size: Optional[int] = 50 (optional), query. Page size, accepts values between 1 and 50, default 50.
-        :param sort: Optional[str] = "NAME" (optional), query. 
-        
+        :param sort: Optional[str] = "NAME" (optional), query.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: PageDtoClientDto
         """
-        endpoint = f"/api2/v1/clients"
+
+        endpoint = "/api2/v1/clients"
+
         params = {
             "name": name,
             "createdBy": created_by,
             "sort": sort,
             "order": order,
             "pageNumber": page_number,
-            "pageSize": page_size
-            
-        }
-        headers = {
-            
+            "pageSize": page_size,
         }
 
-        content = None
-
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = await self.client.make_request(
@@ -207,43 +182,39 @@ class ClientOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return PageDtoClientDto(**r.json())
-        
-
+        return PageDtoClientDto.model_validate(r.json())
 
     async def update_client(
         self,
-        client_edit_dto: ClientEditDto,
+        client_edit_dto: ClientEditDto | dict,
         client_uid: str,
         phrase_token: Optional[str] = None,
-) -> ClientDto:
+    ) -> ClientDto:
         """
         Operation id: updateClient
         Edit client
-        
-        :param client_edit_dto: ClientEditDto (required), body. 
-        :param client_uid: str (required), path. 
-        
+
+        :param client_edit_dto: ClientEditDto | dict (required), body.
+        :param client_uid: str (required), path.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: ClientDto
         """
+
         endpoint = f"/api2/v1/clients/{client_uid}"
-        params = {
-            
-        }
-        headers = {
-            
-        }
+        if type(client_edit_dto) is dict:
+            client_edit_dto = ClientEditDto.model_validate(client_edit_dto)
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = client_edit_dto
 
         r = await self.client.make_request(
@@ -254,14 +225,7 @@ class ClientOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return ClientDto(**r.json())
-        
-
-
-
-if __name__ == '__main__':
-    print("This module is not intended to be run directly.")
+        return ClientDto.model_validate(r.json())

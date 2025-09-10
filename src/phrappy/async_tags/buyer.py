@@ -1,23 +1,16 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Union, Any
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from ..client import SyncPhraseTMSClient
+    from ..async_client import AsyncPhrappy
 
-from ..models import (
-    BuyerDto,
-    BuyerEditDto,
-    PageDtoBuyerDto
-    
-)
+from ..models import BuyerDto, BuyerEditDto, PageDtoBuyerDto
 
 
 class BuyerOperations:
-    def __init__(self, client: SyncPhraseTMSClient):
+    def __init__(self, client: AsyncPhrappy):
         self.client = client
-
 
     async def list_buyers(
         self,
@@ -26,36 +19,34 @@ class BuyerOperations:
         page_size: Optional[int] = 50,
         sort: Optional[str] = "NAME",
         phrase_token: Optional[str] = None,
-) -> PageDtoBuyerDto:
+    ) -> PageDtoBuyerDto:
         """
         Operation id: listBuyers
         List buyers
-        
-        :param order: Optional[str] = "ASC" (optional), query. 
+
+        :param order: Optional[str] = "ASC" (optional), query.
         :param page_number: Optional[int] = 0 (optional), query. Page number, starting with 0, default 0.
         :param page_size: Optional[int] = 50 (optional), query. Page size, accepts values between 1 and 50, default 50.
-        :param sort: Optional[str] = "NAME" (optional), query. 
-        
+        :param sort: Optional[str] = "NAME" (optional), query.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: PageDtoBuyerDto
         """
-        endpoint = f"/api2/v1/buyers"
+
+        endpoint = "/api2/v1/buyers"
+
         params = {
             "sort": sort,
             "order": order,
             "pageNumber": page_number,
-            "pageSize": page_size
-            
-        }
-        headers = {
-            
+            "pageSize": page_size,
         }
 
-        content = None
-
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = await self.client.make_request(
@@ -66,43 +57,39 @@ class BuyerOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return PageDtoBuyerDto(**r.json())
-        
-
+        return PageDtoBuyerDto.model_validate(r.json())
 
     async def update_buyer(
         self,
-        buyer_edit_dto: BuyerEditDto,
         buyer_uid: str,
+        buyer_edit_dto: Optional[BuyerEditDto | dict] = None,
         phrase_token: Optional[str] = None,
-) -> BuyerDto:
+    ) -> BuyerDto:
         """
         Operation id: updateBuyer
         Edit buyer
-        
-        :param buyer_edit_dto: BuyerEditDto (required), body. 
-        :param buyer_uid: str (required), path. 
-        
+
+        :param buyer_uid: str (required), path.
+        :param buyer_edit_dto: Optional[BuyerEditDto | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: BuyerDto
         """
+
         endpoint = f"/api2/v1/buyers/{buyer_uid}"
-        params = {
-            
-        }
-        headers = {
-            
-        }
+        if type(buyer_edit_dto) is dict:
+            buyer_edit_dto = BuyerEditDto.model_validate(buyer_edit_dto)
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = buyer_edit_dto
 
         r = await self.client.make_request(
@@ -113,14 +100,7 @@ class BuyerOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return BuyerDto(**r.json())
-        
-
-
-
-if __name__ == '__main__':
-    print("This module is not intended to be run directly.")
+        return BuyerDto.model_validate(r.json())

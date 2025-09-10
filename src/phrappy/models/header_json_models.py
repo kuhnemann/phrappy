@@ -1,9 +1,8 @@
-from typing import List, Optional, TYPE_CHECKING
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
-if TYPE_CHECKING:
-    from .phrase_tms_api_models import UidReference, IdReference
+from .phrase_tms_api_models import UidReference, IdReference
 
 
 class RateLimitsBaseModel(BaseModel):
@@ -26,7 +25,7 @@ class UploadHandoverFileMeta(BaseModel):
 
 class JobUpdateTargetMeta(BaseModel):
     jobs: List["UidReference"] = Field(max_length=1)
-    propagateConfirmedToTm: bool = True
+    propagateConfirmedToTm: bool = False
     targetSegmentationRule: Optional["IdReference"] = None
     callbackUrl: Optional[str] = None
     unconfirmChangedSegments: Optional[bool] = True

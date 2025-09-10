@@ -1,21 +1,16 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Union, Any
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from ..client import SyncPhraseTMSClient
+    from ..client import Phrappy
 
-from ..models import (
-    PageDtoXmlAssistantProfileListDto
-    
-)
+from ..models import PageDtoXmlAssistantProfileListDto
 
 
 class XMLAssistantOperations:
-    def __init__(self, client: SyncPhraseTMSClient):
+    def __init__(self, client: Phrappy):
         self.client = client
-
 
     def list_xml_assistant_profiles(
         self,
@@ -31,28 +26,30 @@ class XMLAssistantOperations:
         updated_at: Optional[str] = None,
         updated_by: Optional[str] = None,
         phrase_token: Optional[str] = None,
-) -> PageDtoXmlAssistantProfileListDto:
+    ) -> PageDtoXmlAssistantProfileListDto:
         """
         Operation id: listXmlAssistantProfiles
         Get XML assistant profiles for organization
-        
-        :param created_at: Optional[str] = None (optional), query. 
-        :param created_by: Optional[str] = None (optional), query. 
-        :param description: Optional[str] = None (optional), query. 
-        :param name: Optional[str] = None (optional), query. 
-        :param order: Optional[str] = None (optional), query. 
-        :param page_number: Optional[int] = 0 (optional), query. 
-        :param page_size: Optional[int] = 50 (optional), query. 
-        :param search: Optional[str] = None (optional), query. 
-        :param sort: Optional[str] = None (optional), query. 
-        :param updated_at: Optional[str] = None (optional), query. 
-        :param updated_by: Optional[str] = None (optional), query. 
-        
+
+        :param created_at: Optional[str] = None (optional), query.
+        :param created_by: Optional[str] = None (optional), query.
+        :param description: Optional[str] = None (optional), query.
+        :param name: Optional[str] = None (optional), query.
+        :param order: Optional[str] = None (optional), query.
+        :param page_number: Optional[int] = 0 (optional), query.
+        :param page_size: Optional[int] = 50 (optional), query.
+        :param search: Optional[str] = None (optional), query.
+        :param sort: Optional[str] = None (optional), query.
+        :param updated_at: Optional[str] = None (optional), query.
+        :param updated_by: Optional[str] = None (optional), query.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: PageDtoXmlAssistantProfileListDto
         """
-        endpoint = f"/api2/v1/xmlAssistantProfiles"
+
+        endpoint = "/api2/v1/xmlAssistantProfiles"
+
         params = {
             "name": name,
             "description": description,
@@ -64,17 +61,13 @@ class XMLAssistantOperations:
             "pageNumber": page_number,
             "pageSize": page_size,
             "sort": sort,
-            "order": order
-            
-        }
-        headers = {
-            
+            "order": order,
         }
 
-        content = None
-
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = self.client.make_request(
@@ -85,14 +78,7 @@ class XMLAssistantOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return PageDtoXmlAssistantProfileListDto(**r.json())
-        
-
-
-
-if __name__ == '__main__':
-    print("This module is not intended to be run directly.")
+        return PageDtoXmlAssistantProfileListDto.model_validate(r.json())

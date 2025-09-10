@@ -1,11 +1,12 @@
 import logging
-from typing import Optional, TypeVar, Dict
+import asyncio
+from typing import Optional, TypeVar, Dict, Any, Union, Mapping, Sequence, Tuple
+from collections import deque
 
-import httpx
-from httpx import HTTPStatusError
-from httpx._types import RequestFiles
+from httpx import HTTPStatusError, Response, AsyncClient
 from pydantic import BaseModel
 
+from ._meta import __version__, homepage
 from .exceptions import PhrappyError
 from .async_tags import (
     AdditionalWorkflowStepOperations,
@@ -21,11 +22,13 @@ from .async_tags import (
     CustomFieldsOperations,
     CustomFileTypeOperations,
     DomainOperations,
+    DueDateSchemeOperations,
     EmailTemplateOperations,
     FileOperations,
     GlossaryOperations,
     ImportsettingsOperations,
     ConversationsOperations,
+    JobOperations,
     SupportedLanguagesOperations,
     LanguageQualityAssessmentOperations,
     QualityAssuranceOperations,
@@ -40,7 +43,6 @@ from .async_tags import (
     TermBaseOperations,
     TranslationMemoryOperations,
     ProjectOperations,
-    JobOperations,
     TranslationOperations,
     SegmentOperations,
     ProviderOperations,
@@ -48,6 +50,7 @@ from .async_tags import (
     QuoteOperations,
     SCIMOperations,
     SegmentationRulesOperations,
+    ServiceOperations,
     SpellCheckOperations,
     SubDomainOperations,
     UserOperations,
@@ -55,8 +58,7 @@ from .async_tags import (
     VendorOperations,
     WebhookOperations,
     XMLAssistantOperations,
-    WorkflowchangesOperations
-    
+    WorkflowchangesOperations,
 )
 
 
@@ -64,19 +66,51 @@ MEMSOURCE_BASE_URL = "https://cloud.memsource.com/web"
 
 logger = logging.getLogger(__name__)
 
-T = TypeVar('T', bound=BaseModel)
+T = TypeVar("T", bound=BaseModel)
+FileType = Tuple[str, Union[bytes, Any]]
+RequestFiles = Union[Mapping[str, FileType], Sequence[Tuple[str, FileType]]]
+
+ua = f"phrappy/{__version__} (+{homepage})"
 
 
 class AsyncPhrappy:
-    def __init__(self, token: Optional[str] = None):
-        def _token_validation(token) -> str | None:
-            if token and token.startswith("ApiToken "):
-                return token
-            elif token:
-                return "ApiToken " + token
-            else:
-                return
-        self.token = _token_validation(token)
+    """Async client for interacting with the Phrase TMS API."""
+
+    def __init__(
+        self,
+        token: Optional[str] = None,
+        base_url: str = MEMSOURCE_BASE_URL,
+        timeout=180,
+    ):
+        """
+        Args:
+            token: Optional API token. If provided without "ApiToken " prefix, it will be added.
+            base_url: Base URL for API requests. Defaults to cloud.memsource.com.
+        """
+        self._client = AsyncClient(timeout=timeout, headers={"User-Agent": ua})
+        self.base_url = base_url
+        self.token = self._validate_token(token)
+        self.last_responses = deque(maxlen=5)
+        self._init_operations()
+
+    async def aclose(self) -> None:
+        await self._client.aclose()
+
+    async def __aenter__(self) -> "AsyncPhrappy":
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb) -> None:
+        await self.aclose()
+
+    @staticmethod
+    def _validate_token(token: Optional[str]) -> Optional[str]:
+        if not token:
+            return None
+        if token.startswith("ApiToken "):
+            return token
+        return f"ApiToken {token}"
+
+    def _init_operations(self) -> None:
         self.additional_workflow_step = AdditionalWorkflowStepOperations(self)
         self.analysis = AnalysisOperations(self)
         self.async_request = AsyncRequestOperations(self)
@@ -90,11 +124,13 @@ class AsyncPhrappy:
         self.custom_fields = CustomFieldsOperations(self)
         self.custom_file_type = CustomFileTypeOperations(self)
         self.domain = DomainOperations(self)
+        self.due_date_scheme = DueDateSchemeOperations(self)
         self.email_template = EmailTemplateOperations(self)
         self.file = FileOperations(self)
         self.glossary = GlossaryOperations(self)
         self.importsettings = ImportsettingsOperations(self)
         self.conversations = ConversationsOperations(self)
+        self.job = JobOperations(self)
         self.supported_languages = SupportedLanguagesOperations(self)
         self.language_quality_assessment = LanguageQualityAssessmentOperations(self)
         self.quality_assurance = QualityAssuranceOperations(self)
@@ -109,7 +145,6 @@ class AsyncPhrappy:
         self.term_base = TermBaseOperations(self)
         self.translation_memory = TranslationMemoryOperations(self)
         self.project = ProjectOperations(self)
-        self.job = JobOperations(self)
         self.translation = TranslationOperations(self)
         self.segment = SegmentOperations(self)
         self.provider = ProviderOperations(self)
@@ -117,6 +152,7 @@ class AsyncPhrappy:
         self.quote = QuoteOperations(self)
         self.scim = SCIMOperations(self)
         self.segmentation_rules = SegmentationRulesOperations(self)
+        self.service = ServiceOperations(self)
         self.spell_check = SpellCheckOperations(self)
         self.sub_domain = SubDomainOperations(self)
         self.user = UserOperations(self)
@@ -125,75 +161,105 @@ class AsyncPhrappy:
         self.webhook = WebhookOperations(self)
         self.xml_assistant = XMLAssistantOperations(self)
         self.workflowchanges = WorkflowchangesOperations(self)
-        
 
     async def make_request(
         self,
         method: str,
         path: str,
         phrase_token: Optional[str] = None,
-        params: Optional[dict] = None,
-        payload: Optional[T | Dict] = None,
+        params: Optional[Dict[str, Any]] = None,
+        payload: Optional[Union[T, Dict[str, Any]]] = None,
         files: Optional[RequestFiles] = None,
-        headers: Optional[dict] = None,
+        headers: Optional[Dict[str, str]] = None,
         content: Optional[bytes] = None,
-        timeout: float = 180.0
-    ) -> httpx.Response:
-        token = phrase_token or self.token
+        timeout: float = 180.0,
+    ) -> Response:
+        """Perform an async HTTP request to the Phrase TMS API."""
+        if not path.startswith("/"):
+            path = "/" + path
+        url = self.base_url.rstrip("/") + path
 
-        url = f"{MEMSOURCE_BASE_URL}{path}"
-        header = {}
-
-        if token:
-            header["Authorization"] = token
-        if headers is not None:
-            header.update(headers)
+        request_headers = {}
+        request_headers.setdefault("User-Agent", ua)
+        if token := (phrase_token or self.token):
+            request_headers["Authorization"] = token
+        if headers:
+            request_headers.update(headers)
 
         if payload is not None and not isinstance(payload, dict):
             try:
-                payload = payload.model_dump(exclude_unset=True)
+                payload = payload.model_dump(exclude_none=True)
             except Exception as e:
-                logger.exception(f"Payload could not be cast as dict: {e}")
-                raise Exception from e
+                logger.exception("Failed to serialize payload")
+                raise PhrappyError("Failed to serialize request payload") from e
 
-        if params is not None:
-            remove = []
-            for k, v in params.items():
-                if v is None:
-                    remove.append(k)
-            if remove:
-                for k in remove:
-                    params.pop(k)
-        async with httpx.AsyncClient() as client:
-            r = await client.request(
-                method=method,
-                url=url,
-                headers=header,
-                params=params,
-                json=payload,
-                files=files,
-                content=content,
-                timeout=timeout,
-            )
+        if params:
+            params = {k: v for k, v in params.items() if v is not None}
 
-        try:
-            r.raise_for_status()
-        except HTTPStatusError as exc:
+        response: Optional[Response] = None
+        for attempt in range(3):
             try:
-                loaded_errors = r.json()
-                error_code = loaded_errors.get("errorCode")
-                error_detail = loaded_errors.get("errorDescription")
-                msg = f"Call failed: {method=} {url=}, {r.request.content=}, {r.status_code=}, {error_code=}, {error_detail=}"
-                raise PhrappyError(msg)
-            except:
-                logger.exception(f"Call failed: {r} // {url=} - {r.request.content=}")
-                raise Exception from exc
-        else:
-            return r
+                response = await self._client.request(
+                    method=method,
+                    url=url,
+                    headers=request_headers,
+                    params=params,
+                    json=payload,
+                    files=files,
+                    content=content,
+                    timeout=timeout,
+                )
+                # Cache small responses for diagnostics
+                try:
+                    cl = int(response.headers.get("Content-Length") or 0)
+                except ValueError:
+                    cl = 0
+                if cl and cl < 10240:
+                    await response.aread()
+                    self.last_responses.append(response)
+
+                response.raise_for_status()
+                return response
+
+            except HTTPStatusError as exc:
+                if response:
+                    if response.status_code in (429, 503):
+                        await asyncio.sleep(min(2**attempt, 8))
+                        continue
+                    try:
+                        await response.aread()
+                        error_data = response.json()
+                        error_code = error_data.get("errorCode")
+                        error_desc = error_data.get("errorDescription")
+                        msg = (
+                            f"API request failed: {method} {url}\n"
+                            f"Status: {response.status_code}\n"
+                            f"Error code: {error_code}\n"
+                            f"Description: {error_desc}"
+                        )
+                        raise PhrappyError(msg) from exc
+                    except ValueError:
+                        raise PhrappyError(
+                            f"API request failed with invalid JSON response: {await response.aread() or b''}"
+                        ) from exc
+                else:
+                    raise PhrappyError(
+                        f"Request failed with no response: {str(exc)}"
+                    ) from exc
+
+            except Exception as e:
+                logger.exception(f"Unexpected error during request: {url}")
+                raise PhrappyError(f"An unexpected error occurred: {str(e)}") from e
+
+        # If we somehow exit the retry loop without returning/raising earlier:
+        raise PhrappyError("Request retries exhausted")
 
     @classmethod
-    async def from_creds(cls, username: str, password: str) -> 'Phrappy':
-        pp = cls()
+    async def from_creds(
+        cls, username: str, password: str, base_url=MEMSOURCE_BASE_URL, timeout=180
+    ) -> "AsyncPhrappy":
+        pp = cls(base_url=base_url, timeout=timeout)
         login_dto = {"userName": username, "password": password}
         resp = await pp.authentication.login(login_dto)
-        return cls(resp.token)
+        pp.token = pp._validate_token(getattr(resp, "token", None))
+        return pp

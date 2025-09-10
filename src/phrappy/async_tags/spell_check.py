@@ -1,56 +1,52 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Union, Any
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from ..client import SyncPhraseTMSClient
+    from ..async_client import AsyncPhrappy
 
 from ..models import (
-    SpellCheckResponseDto,
     DictionaryItemDto,
-    SuggestResponseDto,
+    SpellCheckRequestDto,
+    SpellCheckResponseDto,
     SuggestRequestDto,
-    SpellCheckRequestDto
-    
+    SuggestResponseDto,
 )
 
 
 class SpellCheckOperations:
-    def __init__(self, client: SyncPhraseTMSClient):
+    def __init__(self, client: AsyncPhrappy):
         self.client = client
-
 
     async def add_word(
         self,
-        dictionary_item_dto: DictionaryItemDto,
+        dictionary_item_dto: Optional[DictionaryItemDto | dict] = None,
         phrase_token: Optional[str] = None,
-) -> None:
+    ) -> None:
         """
         Operation id: addWord
         Add word to dictionary
-        
-        :param dictionary_item_dto: DictionaryItemDto (required), body. 
-        
+
+        :param dictionary_item_dto: Optional[DictionaryItemDto | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: None
         """
-        endpoint = f"/api2/v1/spellCheck/words"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        endpoint = "/api2/v1/spellCheck/words"
+        if type(dictionary_item_dto) is dict:
+            dictionary_item_dto = DictionaryItemDto.model_validate(dictionary_item_dto)
 
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = dictionary_item_dto
 
-        r = await self.client.make_request(
+        await self.client.make_request(
             "POST",
             endpoint,
             phrase_token,
@@ -58,41 +54,39 @@ class SpellCheckOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
         return
-        
-
 
     async def check(
         self,
-        spell_check_request_dto: SpellCheckRequestDto,
+        spell_check_request_dto: Optional[SpellCheckRequestDto | dict] = None,
         phrase_token: Optional[str] = None,
-) -> SpellCheckResponseDto:
+    ) -> SpellCheckResponseDto:
         """
         Operation id: check
         Spell check
         Spell check using the settings of the user's organization
-        :param spell_check_request_dto: SpellCheckRequestDto (required), body. 
-        
+        :param spell_check_request_dto: Optional[SpellCheckRequestDto | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: SpellCheckResponseDto
         """
-        endpoint = f"/api2/v1/spellCheck/check"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        endpoint = "/api2/v1/spellCheck/check"
+        if type(spell_check_request_dto) is dict:
+            spell_check_request_dto = SpellCheckRequestDto.model_validate(
+                spell_check_request_dto
+            )
 
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = spell_check_request_dto
 
         r = await self.client.make_request(
@@ -103,43 +97,41 @@ class SpellCheckOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return SpellCheckResponseDto(**r.json())
-        
-
+        return SpellCheckResponseDto.model_validate(r.json())
 
     async def check_by_job(
         self,
-        spell_check_request_dto: SpellCheckRequestDto,
         job_uid: str,
+        spell_check_request_dto: Optional[SpellCheckRequestDto | dict] = None,
         phrase_token: Optional[str] = None,
-) -> SpellCheckResponseDto:
+    ) -> SpellCheckResponseDto:
         """
         Operation id: checkByJob
         Spell check for job
         Spell check using the settings from the project of the job
-        :param spell_check_request_dto: SpellCheckRequestDto (required), body. 
-        :param job_uid: str (required), path. 
-        
+        :param job_uid: str (required), path.
+        :param spell_check_request_dto: Optional[SpellCheckRequestDto | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: SpellCheckResponseDto
         """
+
         endpoint = f"/api2/v1/spellCheck/check/{job_uid}"
-        params = {
-            
-        }
-        headers = {
-            
-        }
+        if type(spell_check_request_dto) is dict:
+            spell_check_request_dto = SpellCheckRequestDto.model_validate(
+                spell_check_request_dto
+            )
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = spell_check_request_dto
 
         r = await self.client.make_request(
@@ -150,41 +142,37 @@ class SpellCheckOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return SpellCheckResponseDto(**r.json())
-        
-
+        return SpellCheckResponseDto.model_validate(r.json())
 
     async def suggest(
         self,
-        suggest_request_dto: SuggestRequestDto,
+        suggest_request_dto: Optional[SuggestRequestDto | dict] = None,
         phrase_token: Optional[str] = None,
-) -> SuggestResponseDto:
+    ) -> SuggestResponseDto:
         """
         Operation id: suggest
         Suggest a word
         Spell check suggest using the users's spell check dictionary
-        :param suggest_request_dto: SuggestRequestDto (required), body. 
-        
+        :param suggest_request_dto: Optional[SuggestRequestDto | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: SuggestResponseDto
         """
-        endpoint = f"/api2/v1/spellCheck/suggest"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        endpoint = "/api2/v1/spellCheck/suggest"
+        if type(suggest_request_dto) is dict:
+            suggest_request_dto = SuggestRequestDto.model_validate(suggest_request_dto)
 
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = suggest_request_dto
 
         r = await self.client.make_request(
@@ -195,14 +183,7 @@ class SpellCheckOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return SuggestResponseDto(**r.json())
-        
-
-
-
-if __name__ == '__main__':
-    print("This module is not intended to be run directly.")
+        return SuggestResponseDto.model_validate(r.json())

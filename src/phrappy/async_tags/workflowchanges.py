@@ -1,49 +1,47 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Union, Any
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from ..client import SyncPhraseTMSClient
+    from ..async_client import AsyncPhrappy
 
-from ..models import (
-    WorkflowChangesDto
-    
-)
+from ..models import WorkflowChangesDto
 
 
 class WorkflowchangesOperations:
-    def __init__(self, client: SyncPhraseTMSClient):
+    def __init__(self, client: AsyncPhrappy):
         self.client = client
-
 
     async def download_workflow_changes(
         self,
-        workflow_changes_dto: WorkflowChangesDto,
+        workflow_changes_dto: Optional[WorkflowChangesDto | dict] = None,
         phrase_token: Optional[str] = None,
-) -> None:
+    ) -> bytes:
         """
         Operation id: downloadWorkflowChanges
         Download workflow changes report
-        
-        :param workflow_changes_dto: WorkflowChangesDto (required), body. 
-        
+
+        :param workflow_changes_dto: Optional[WorkflowChangesDto | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
-        :return: None
+        !!! N.B.: API docs have no 200 range response declared, so falling back to returning the raw bytes from the API response.
+
+        :return: bytes
         """
-        endpoint = f"/api2/v2/jobs/workflowChanges"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        endpoint = "/api2/v2/jobs/workflowChanges"
+        if type(workflow_changes_dto) is dict:
+            workflow_changes_dto = WorkflowChangesDto.model_validate(
+                workflow_changes_dto
+            )
 
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = workflow_changes_dto
 
         r = await self.client.make_request(
@@ -54,14 +52,7 @@ class WorkflowchangesOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return
-        
-
-
-
-if __name__ == '__main__':
-    print("This module is not intended to be run directly.")
+        return await r.aread()

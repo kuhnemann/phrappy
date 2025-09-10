@@ -1,51 +1,45 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Union, Any
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from ..client import SyncPhraseTMSClient
+    from ..async_client import AsyncPhrappy
 
-from ..models import (
-    BusinessUnitDto,
-    BusinessUnitEditDto,
-    PageDtoBusinessUnitDto
-    
-)
+from ..models import BusinessUnitDto, BusinessUnitEditDto, PageDtoBusinessUnitDto
 
 
 class BusinessUnitOperations:
-    def __init__(self, client: SyncPhraseTMSClient):
+    def __init__(self, client: AsyncPhrappy):
         self.client = client
-
 
     async def create_business_unit(
         self,
-        business_unit_edit_dto: BusinessUnitEditDto,
+        business_unit_edit_dto: Optional[BusinessUnitEditDto | dict] = None,
         phrase_token: Optional[str] = None,
-) -> BusinessUnitDto:
+    ) -> BusinessUnitDto:
         """
         Operation id: createBusinessUnit
         Create business unit
-        
-        :param business_unit_edit_dto: BusinessUnitEditDto (required), body. 
-        
+
+        :param business_unit_edit_dto: Optional[BusinessUnitEditDto | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: BusinessUnitDto
         """
-        endpoint = f"/api2/v1/businessUnits"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        endpoint = "/api2/v1/businessUnits"
+        if type(business_unit_edit_dto) is dict:
+            business_unit_edit_dto = BusinessUnitEditDto.model_validate(
+                business_unit_edit_dto
+            )
 
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = business_unit_edit_dto
 
         r = await self.client.make_request(
@@ -56,44 +50,38 @@ class BusinessUnitOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return BusinessUnitDto(**r.json())
-        
-
+        return BusinessUnitDto.model_validate(r.json())
 
     async def delete_business_unit(
         self,
         business_unit_uid: str,
         phrase_token: Optional[str] = None,
-) -> None:
+    ) -> None:
         """
         Operation id: deleteBusinessUnit
         Delete business unit
-        
-        :param business_unit_uid: str (required), path. 
-        
+
+        :param business_unit_uid: str (required), path.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: None
         """
+
         endpoint = f"/api2/v1/businessUnits/{business_unit_uid}"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
-        r = await self.client.make_request(
+        await self.client.make_request(
             "DELETE",
             endpoint,
             phrase_token,
@@ -101,41 +89,35 @@ class BusinessUnitOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
         return
-        
-
 
     async def get_business_unit(
         self,
         business_unit_uid: str,
         phrase_token: Optional[str] = None,
-) -> BusinessUnitDto:
+    ) -> BusinessUnitDto:
         """
         Operation id: getBusinessUnit
         Get business unit
-        
-        :param business_unit_uid: str (required), path. 
-        
+
+        :param business_unit_uid: str (required), path.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: BusinessUnitDto
         """
+
         endpoint = f"/api2/v1/businessUnits/{business_unit_uid}"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = await self.client.make_request(
@@ -146,13 +128,10 @@ class BusinessUnitOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return BusinessUnitDto(**r.json())
-        
-
+        return BusinessUnitDto.model_validate(r.json())
 
     async def list_business_units(
         self,
@@ -163,40 +142,38 @@ class BusinessUnitOperations:
         page_size: Optional[int] = 50,
         sort: Optional[str] = "NAME",
         phrase_token: Optional[str] = None,
-) -> PageDtoBusinessUnitDto:
+    ) -> PageDtoBusinessUnitDto:
         """
         Operation id: listBusinessUnits
         List business units
-        
+
         :param created_by: Optional[str] = None (optional), query. Uid of user.
         :param name: Optional[str] = None (optional), query. Unique name of the business unit.
-        :param order: Optional[str] = "ASC" (optional), query. 
+        :param order: Optional[str] = "ASC" (optional), query.
         :param page_number: Optional[int] = 0 (optional), query. Page number, starting with 0, default 0.
         :param page_size: Optional[int] = 50 (optional), query. Page size, accepts values between 1 and 50, default 50.
-        :param sort: Optional[str] = "NAME" (optional), query. 
-        
+        :param sort: Optional[str] = "NAME" (optional), query.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: PageDtoBusinessUnitDto
         """
-        endpoint = f"/api2/v1/businessUnits"
+
+        endpoint = "/api2/v1/businessUnits"
+
         params = {
             "name": name,
             "createdBy": created_by,
             "sort": sort,
             "order": order,
             "pageNumber": page_number,
-            "pageSize": page_size
-            
-        }
-        headers = {
-            
+            "pageSize": page_size,
         }
 
-        content = None
-
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = await self.client.make_request(
@@ -207,43 +184,41 @@ class BusinessUnitOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return PageDtoBusinessUnitDto(**r.json())
-        
-
+        return PageDtoBusinessUnitDto.model_validate(r.json())
 
     async def update_business_unit(
         self,
-        business_unit_edit_dto: BusinessUnitEditDto,
         business_unit_uid: str,
+        business_unit_edit_dto: Optional[BusinessUnitEditDto | dict] = None,
         phrase_token: Optional[str] = None,
-) -> BusinessUnitDto:
+    ) -> BusinessUnitDto:
         """
         Operation id: updateBusinessUnit
         Edit business unit
-        
-        :param business_unit_edit_dto: BusinessUnitEditDto (required), body. 
-        :param business_unit_uid: str (required), path. 
-        
+
+        :param business_unit_uid: str (required), path.
+        :param business_unit_edit_dto: Optional[BusinessUnitEditDto | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: BusinessUnitDto
         """
+
         endpoint = f"/api2/v1/businessUnits/{business_unit_uid}"
-        params = {
-            
-        }
-        headers = {
-            
-        }
+        if type(business_unit_edit_dto) is dict:
+            business_unit_edit_dto = BusinessUnitEditDto.model_validate(
+                business_unit_edit_dto
+            )
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = business_unit_edit_dto
 
         r = await self.client.make_request(
@@ -254,14 +229,7 @@ class BusinessUnitOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return BusinessUnitDto(**r.json())
-        
-
-
-
-if __name__ == '__main__':
-    print("This module is not intended to be run directly.")
+        return BusinessUnitDto.model_validate(r.json())

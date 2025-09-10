@@ -1,58 +1,59 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Union, Any
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from ..client import SyncPhraseTMSClient
+    from ..async_client import AsyncPhrappy
 
 from ..models import (
-    CreateReferenceFilesRequest,
     ProjectReferenceFilesRequestDto,
+    ReferenceFilePageDto,
     ReferenceFilesDto,
     UserReferencesDto,
-    ReferenceFilePageDto
-    
 )
 
 
 class ProjectReferenceFileOperations:
-    def __init__(self, client: SyncPhraseTMSClient):
+    def __init__(self, client: AsyncPhrappy):
         self.client = client
-
 
     async def batch_delete_reference_files(
         self,
-        project_reference_files_request_dto: ProjectReferenceFilesRequestDto,
         project_uid: str,
+        project_reference_files_request_dto: Optional[
+            ProjectReferenceFilesRequestDto | dict
+        ] = None,
         phrase_token: Optional[str] = None,
-) -> None:
+    ) -> None:
         """
         Operation id: batchDeleteReferenceFiles
         Delete project reference files (batch)
-        
-        :param project_reference_files_request_dto: ProjectReferenceFilesRequestDto (required), body. 
-        :param project_uid: str (required), path. 
-        
+
+        :param project_uid: str (required), path.
+        :param project_reference_files_request_dto: Optional[ProjectReferenceFilesRequestDto | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: None
         """
+
         endpoint = f"/api2/v1/projects/{project_uid}/references"
-        params = {
-            
-        }
-        headers = {
-            
-        }
+        if type(project_reference_files_request_dto) is dict:
+            project_reference_files_request_dto = (
+                ProjectReferenceFilesRequestDto.model_validate(
+                    project_reference_files_request_dto
+                )
+            )
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = project_reference_files_request_dto
 
-        r = await self.client.make_request(
+        await self.client.make_request(
             "DELETE",
             endpoint,
             phrase_token,
@@ -60,43 +61,45 @@ class ProjectReferenceFileOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
         return
-        
-
 
     async def batch_download_reference_files(
         self,
-        project_reference_files_request_dto: ProjectReferenceFilesRequestDto,
         project_uid: str,
+        project_reference_files_request_dto: Optional[
+            ProjectReferenceFilesRequestDto | dict
+        ] = None,
         phrase_token: Optional[str] = None,
-) -> bytes:
+    ) -> bytes:
         """
         Operation id: batchDownloadReferenceFiles
         Download project reference files (batch)
-        
-        :param project_reference_files_request_dto: ProjectReferenceFilesRequestDto (required), body. 
-        :param project_uid: str (required), path. 
-        
+
+        :param project_uid: str (required), path.
+        :param project_reference_files_request_dto: Optional[ProjectReferenceFilesRequestDto | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: bytes
         """
+
         endpoint = f"/api2/v1/projects/{project_uid}/references/download"
-        params = {
-            
-        }
-        headers = {
-            
-        }
+        if type(project_reference_files_request_dto) is dict:
+            project_reference_files_request_dto = (
+                ProjectReferenceFilesRequestDto.model_validate(
+                    project_reference_files_request_dto
+                )
+            )
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = project_reference_files_request_dto
 
         r = await self.client.make_request(
@@ -107,56 +110,52 @@ class ProjectReferenceFileOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return r.content
-        
-
+        return await r.aread()
 
     async def create_reference_files(
         self,
-        multipart: CreateReferenceFilesRequest,
+        file: bytes,
         project_uid: str,
+        filename: Optional[str] = None,
         phrase_token: Optional[str] = None,
-) -> ReferenceFilesDto:
+    ) -> ReferenceFilesDto:
         """
         Operation id: createReferenceFiles
         Create project reference files
-        
-The `json` request part allows sending additional data as JSON,
-such as a text note that will be used for all the given reference files.
-In case no `file` parts are sent, only 1 reference is created with the given note.
-Either at least one file must be sent or the note must be specified.
-Example:
 
-```
-{
-    "note": "Sample text"
-}
-```
+        The `json` request part allows sending additional data as JSON,
+        such as a text note that will be used for all the given reference files.
+        In case no `file` parts are sent, only 1 reference is created with the given note.
+        Either at least one file must be sent or the note must be specified.
+        Example:
 
-        :param multipart: CreateReferenceFilesRequest (required), body. Multipart request with files and JSON.
-        :param project_uid: str (required), path. 
-        
+        ```
+        {
+            "note": "Sample text"
+        }
+        ```
+
+        :param file: bytes (required), formData.
+        :param project_uid: str (required), path.
+
+        :param filename: Optional name for the uploaded file; defaults to field name.
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: ReferenceFilesDto
         """
+
         endpoint = f"/api2/v2/projects/{project_uid}/references"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
+        files = {"file": (filename or "file", file)}
+        payload = None
         content = None
-
-        files = None
-
-        payload = multipart
 
         r = await self.client.make_request(
             "POST",
@@ -166,43 +165,37 @@ Example:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return ReferenceFilesDto(**r.json())
-        
-
+        return ReferenceFilesDto.model_validate(r.json())
 
     async def download_reference(
         self,
         project_uid: str,
         reference_file_id: str,
         phrase_token: Optional[str] = None,
-) -> bytes:
+    ) -> bytes:
         """
         Operation id: downloadReference
         Download project reference file
-        
-        :param project_uid: str (required), path. 
-        :param reference_file_id: str (required), path. 
-        
+
+        :param project_uid: str (required), path.
+        :param reference_file_id: str (required), path.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: bytes
         """
+
         endpoint = f"/api2/v1/projects/{project_uid}/references/{reference_file_id}"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = await self.client.make_request(
@@ -213,46 +206,39 @@ Example:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return r.content
-        
-
+        return await r.aread()
 
     async def list_reference_file_creators(
         self,
         project_uid: str,
         user_name: Optional[str] = None,
         phrase_token: Optional[str] = None,
-) -> UserReferencesDto:
+    ) -> UserReferencesDto:
         """
         Operation id: listReferenceFileCreators
         List project reference file creators
         The result is not paged and returns up to 50 users.
-                If the requested user is not included, the search can be narrowed down with the `userName` parameter.
-            
-        :param project_uid: str (required), path. 
-        :param user_name: Optional[str] = None (optional), query. 
-        
+                        If the requested user is not included, the search can be narrowed down with the `userName` parameter.
+
+        :param project_uid: str (required), path.
+        :param user_name: Optional[str] = None (optional), query.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: UserReferencesDto
         """
+
         endpoint = f"/api2/v1/projects/{project_uid}/references/creators"
-        params = {
-            "userName": user_name
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        params = {"userName": user_name}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = await self.client.make_request(
@@ -263,13 +249,10 @@ Example:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return UserReferencesDto(**r.json())
-        
-
+        return UserReferencesDto.model_validate(r.json())
 
     async def list_reference_files(
         self,
@@ -282,25 +265,27 @@ Example:
         page_size: Optional[int] = 50,
         sort: Optional[str] = "DATE_CREATED",
         phrase_token: Optional[str] = None,
-) -> ReferenceFilePageDto:
+    ) -> ReferenceFilePageDto:
         """
         Operation id: listReferenceFiles
         List project reference files
-        
-        :param project_uid: str (required), path. 
+
+        :param project_uid: str (required), path.
         :param created_by: Optional[str] = None (optional), query. UID of user.
         :param date_created_since: Optional[str] = None (optional), query. date time in ISO 8601 UTC format.
-        :param filename: Optional[str] = None (optional), query. 
-        :param order: Optional[str] = "DESC" (optional), query. 
-        :param page_number: Optional[int] = 0 (optional), query. 
-        :param page_size: Optional[int] = 50 (optional), query. 
-        :param sort: Optional[str] = "DATE_CREATED" (optional), query. 
-        
+        :param filename: Optional[str] = None (optional), query.
+        :param order: Optional[str] = "DESC" (optional), query.
+        :param page_number: Optional[int] = 0 (optional), query.
+        :param page_size: Optional[int] = 50 (optional), query.
+        :param sort: Optional[str] = "DATE_CREATED" (optional), query.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: ReferenceFilePageDto
         """
+
         endpoint = f"/api2/v1/projects/{project_uid}/references"
+
         params = {
             "filename": filename,
             "dateCreatedSince": date_created_since,
@@ -308,17 +293,13 @@ Example:
             "pageNumber": page_number,
             "pageSize": page_size,
             "sort": sort,
-            "order": order
-            
-        }
-        headers = {
-            
+            "order": order,
         }
 
-        content = None
-
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = await self.client.make_request(
@@ -329,14 +310,7 @@ Example:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return ReferenceFilePageDto(**r.json())
-        
-
-
-
-if __name__ == '__main__':
-    print("This module is not intended to be run directly.")
+        return ReferenceFilePageDto.model_validate(r.json())

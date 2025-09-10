@@ -1,55 +1,92 @@
 from __future__ import annotations
 
-from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional, Union, Any
+from typing import TYPE_CHECKING, Optional
 
 if TYPE_CHECKING:
-    from ..client import SyncPhraseTMSClient
+    from ..client import Phrappy
 
 from ..models import (
-    PageDtoNetRateSchemeWorkflowStepReference,
-    NetRateSchemeEdit,
-    NetRateSchemeWorkflowStepEdit,
-    NetRateScheme,
     DiscountSchemeCreateDto,
+    NetRateScheme,
+    NetRateSchemeEdit,
+    NetRateSchemeWorkflowStep,
+    NetRateSchemeWorkflowStepEdit,
     PageDtoNetRateSchemeReference,
-    NetRateSchemeWorkflowStep
-    
+    PageDtoNetRateSchemeWorkflowStepReference,
 )
 
 
 class NetRateSchemeOperations:
-    def __init__(self, client: SyncPhraseTMSClient):
+    def __init__(self, client: Phrappy):
         self.client = client
 
-
-    def create_discount_scheme(
+    def clone_discount_scheme(
         self,
-        discount_scheme_create_dto: DiscountSchemeCreateDto,
+        net_rate_scheme_uid: str,
         phrase_token: Optional[str] = None,
-) -> NetRateScheme:
+    ) -> NetRateScheme:
         """
-        Operation id: createDiscountScheme
-        Create net rate scheme
-        
-        :param discount_scheme_create_dto: DiscountSchemeCreateDto (required), body. 
-        
+        Operation id: cloneDiscountScheme
+        Clone net rate scheme
+
+        :param net_rate_scheme_uid: str (required), path.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: NetRateScheme
         """
-        endpoint = f"/api2/v1/netRateSchemes"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        endpoint = f"/api2/v1/netRateSchemes/{net_rate_scheme_uid}/clone"
 
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
+        content = None
+        payload = None
 
+        r = self.client.make_request(
+            "POST",
+            endpoint,
+            phrase_token,
+            params=params,
+            payload=payload,
+            files=files,
+            headers=headers,
+            content=content,
+        )
+
+        return NetRateScheme.model_validate(r.json())
+
+    def create_discount_scheme(
+        self,
+        discount_scheme_create_dto: Optional[DiscountSchemeCreateDto | dict] = None,
+        phrase_token: Optional[str] = None,
+    ) -> NetRateScheme:
+        """
+        Operation id: createDiscountScheme
+        Create net rate scheme
+
+        :param discount_scheme_create_dto: Optional[DiscountSchemeCreateDto | dict] = None (optional), body.
+
+        :param phrase_token: string (optional) - if not supplied, client will look for token from init
+
+        :return: NetRateScheme
+        """
+
+        endpoint = "/api2/v1/netRateSchemes"
+        if type(discount_scheme_create_dto) is dict:
+            discount_scheme_create_dto = DiscountSchemeCreateDto.model_validate(
+                discount_scheme_create_dto
+            )
+
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
+        files = None
+        content = None
         payload = discount_scheme_create_dto
 
         r = self.client.make_request(
@@ -60,45 +97,88 @@ class NetRateSchemeOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return NetRateScheme(**r.json())
-        
+        return NetRateScheme.model_validate(r.json())
 
+    def delete_discount_scheme(
+        self,
+        net_rate_scheme_uid: str,
+        phrase_token: Optional[str] = None,
+    ) -> bytes:
+        """
+        Operation id: deleteDiscountScheme
+        Delete net rate scheme
+
+        :param net_rate_scheme_uid: str (required), path.
+
+        :param phrase_token: string (optional) - if not supplied, client will look for token from init
+
+        !!! N.B.: API docs have no 200 range response declared, so falling back to returning the raw bytes from the API response.
+
+        :return: bytes
+        """
+
+        endpoint = f"/api2/v1/netRateSchemes/{net_rate_scheme_uid}"
+
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
+        files = None
+        content = None
+        payload = None
+
+        r = self.client.make_request(
+            "DELETE",
+            endpoint,
+            phrase_token,
+            params=params,
+            payload=payload,
+            files=files,
+            headers=headers,
+            content=content,
+        )
+
+        return r.content
 
     def edit_discount_scheme_workflow_step(
         self,
-        net_rate_scheme_workflow_step_edit: NetRateSchemeWorkflowStepEdit,
         net_rate_scheme_uid: str,
         net_rate_scheme_workflow_step_id: int,
+        net_rate_scheme_workflow_step_edit: Optional[
+            NetRateSchemeWorkflowStepEdit | dict
+        ] = None,
         phrase_token: Optional[str] = None,
-) -> NetRateSchemeWorkflowStep:
+    ) -> NetRateSchemeWorkflowStep:
         """
         Operation id: editDiscountSchemeWorkflowStep
         Edit scheme for workflow step
-        
-        :param net_rate_scheme_workflow_step_edit: NetRateSchemeWorkflowStepEdit (required), body. 
-        :param net_rate_scheme_uid: str (required), path. 
-        :param net_rate_scheme_workflow_step_id: int (required), path. 
-        
+
+        :param net_rate_scheme_uid: str (required), path.
+        :param net_rate_scheme_workflow_step_id: int (required), path.
+        :param net_rate_scheme_workflow_step_edit: Optional[NetRateSchemeWorkflowStepEdit | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: NetRateSchemeWorkflowStep
         """
+
         endpoint = f"/api2/v1/netRateSchemes/{net_rate_scheme_uid}/workflowStepNetSchemes/{net_rate_scheme_workflow_step_id}"
-        params = {
-            
-        }
-        headers = {
-            
-        }
+        if type(net_rate_scheme_workflow_step_edit) is dict:
+            net_rate_scheme_workflow_step_edit = (
+                NetRateSchemeWorkflowStepEdit.model_validate(
+                    net_rate_scheme_workflow_step_edit
+                )
+            )
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = net_rate_scheme_workflow_step_edit
 
         r = self.client.make_request(
@@ -109,41 +189,35 @@ class NetRateSchemeOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return NetRateSchemeWorkflowStep(**r.json())
-        
-
+        return NetRateSchemeWorkflowStep.model_validate(r.json())
 
     def get_discount_scheme(
         self,
         net_rate_scheme_uid: str,
         phrase_token: Optional[str] = None,
-) -> NetRateScheme:
+    ) -> NetRateScheme:
         """
         Operation id: getDiscountScheme
         Get net rate scheme
-        
-        :param net_rate_scheme_uid: str (required), path. 
-        
+
+        :param net_rate_scheme_uid: str (required), path.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: NetRateScheme
         """
+
         endpoint = f"/api2/v1/netRateSchemes/{net_rate_scheme_uid}"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = self.client.make_request(
@@ -154,43 +228,37 @@ class NetRateSchemeOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return NetRateScheme(**r.json())
-        
-
+        return NetRateScheme.model_validate(r.json())
 
     def get_discount_scheme_workflow_step(
         self,
         net_rate_scheme_uid: str,
         net_rate_scheme_workflow_step_id: int,
         phrase_token: Optional[str] = None,
-) -> NetRateSchemeWorkflowStep:
+    ) -> NetRateSchemeWorkflowStep:
         """
         Operation id: getDiscountSchemeWorkflowStep
         Get scheme for workflow step
-        
-        :param net_rate_scheme_uid: str (required), path. 
-        :param net_rate_scheme_workflow_step_id: int (required), path. 
-        
+
+        :param net_rate_scheme_uid: str (required), path.
+        :param net_rate_scheme_workflow_step_id: int (required), path.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: NetRateSchemeWorkflowStep
         """
+
         endpoint = f"/api2/v1/netRateSchemes/{net_rate_scheme_uid}/workflowStepNetSchemes/{net_rate_scheme_workflow_step_id}"
-        params = {
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = self.client.make_request(
@@ -201,13 +269,10 @@ class NetRateSchemeOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return NetRateSchemeWorkflowStep(**r.json())
-        
-
+        return NetRateSchemeWorkflowStep.model_validate(r.json())
 
     def get_discount_scheme_workflow_steps(
         self,
@@ -215,33 +280,30 @@ class NetRateSchemeOperations:
         page_number: Optional[int] = 0,
         page_size: Optional[int] = 50,
         phrase_token: Optional[str] = None,
-) -> PageDtoNetRateSchemeWorkflowStepReference:
+    ) -> PageDtoNetRateSchemeWorkflowStepReference:
         """
         Operation id: getDiscountSchemeWorkflowSteps
         List schemes for workflow step
-        
-        :param net_rate_scheme_uid: str (required), path. 
-        :param page_number: Optional[int] = 0 (optional), query. 
+
+        :param net_rate_scheme_uid: str (required), path.
+        :param page_number: Optional[int] = 0 (optional), query.
         :param page_size: Optional[int] = 50 (optional), query. Page size, accepts values between 1 and 50, default 50.
-        
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: PageDtoNetRateSchemeWorkflowStepReference
         """
-        endpoint = f"/api2/v1/netRateSchemes/{net_rate_scheme_uid}/workflowStepNetSchemes"
-        params = {
-            "pageNumber": page_number,
-            "pageSize": page_size
-            
-        }
-        headers = {
-            
-        }
 
-        content = None
+        endpoint = (
+            f"/api2/v1/netRateSchemes/{net_rate_scheme_uid}/workflowStepNetSchemes"
+        )
 
+        params = {"pageNumber": page_number, "pageSize": page_size}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = self.client.make_request(
@@ -252,13 +314,10 @@ class NetRateSchemeOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return PageDtoNetRateSchemeWorkflowStepReference(**r.json())
-        
-
+        return PageDtoNetRateSchemeWorkflowStepReference.model_validate(r.json())
 
     def get_discount_schemes(
         self,
@@ -268,38 +327,36 @@ class NetRateSchemeOperations:
         page_number: Optional[int] = 0,
         page_size: Optional[int] = 50,
         phrase_token: Optional[str] = None,
-) -> PageDtoNetRateSchemeReference:
+    ) -> PageDtoNetRateSchemeReference:
         """
         Operation id: getDiscountSchemes
         List net rate schemes
-        
+
         :param created_in_last_hours: Optional[int] = None (optional), query. Filter for those created within given hours.
         :param is_default: Optional[bool] = None (optional), query. Filter for default attribute.
         :param name: Optional[str] = None (optional), query. Filter by name.
-        :param page_number: Optional[int] = 0 (optional), query. 
+        :param page_number: Optional[int] = 0 (optional), query.
         :param page_size: Optional[int] = 50 (optional), query. Page size, accepts values between 1 and 50, default 50.
-        
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: PageDtoNetRateSchemeReference
         """
-        endpoint = f"/api2/v1/netRateSchemes"
+
+        endpoint = "/api2/v1/netRateSchemes"
+
         params = {
             "pageNumber": page_number,
             "pageSize": page_size,
             "name": name,
             "isDefault": is_default,
-            "createdInLastHours": created_in_last_hours
-            
-        }
-        headers = {
-            
+            "createdInLastHours": created_in_last_hours,
         }
 
-        content = None
-
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = None
 
         r = self.client.make_request(
@@ -310,43 +367,41 @@ class NetRateSchemeOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return PageDtoNetRateSchemeReference(**r.json())
-        
-
+        return PageDtoNetRateSchemeReference.model_validate(r.json())
 
     def update_discount_scheme(
         self,
-        net_rate_scheme_edit: NetRateSchemeEdit,
         net_rate_scheme_uid: str,
+        net_rate_scheme_edit: Optional[NetRateSchemeEdit | dict] = None,
         phrase_token: Optional[str] = None,
-) -> NetRateScheme:
+    ) -> NetRateScheme:
         """
         Operation id: updateDiscountScheme
         Edit net rate scheme
-        
-        :param net_rate_scheme_edit: NetRateSchemeEdit (required), body. 
-        :param net_rate_scheme_uid: str (required), path. 
-        
+
+        :param net_rate_scheme_uid: str (required), path.
+        :param net_rate_scheme_edit: Optional[NetRateSchemeEdit | dict] = None (optional), body.
+
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
         :return: NetRateScheme
         """
+
         endpoint = f"/api2/v1/netRateSchemes/{net_rate_scheme_uid}"
-        params = {
-            
-        }
-        headers = {
-            
-        }
+        if type(net_rate_scheme_edit) is dict:
+            net_rate_scheme_edit = NetRateSchemeEdit.model_validate(
+                net_rate_scheme_edit
+            )
 
-        content = None
+        params = {}
 
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
         files = None
-
+        content = None
         payload = net_rate_scheme_edit
 
         r = self.client.make_request(
@@ -357,14 +412,7 @@ class NetRateSchemeOperations:
             payload=payload,
             files=files,
             headers=headers,
-            content=content
+            content=content,
         )
 
-        
-        return NetRateScheme(**r.json())
-        
-
-
-
-if __name__ == '__main__':
-    print("This module is not intended to be run directly.")
+        return NetRateScheme.model_validate(r.json())
