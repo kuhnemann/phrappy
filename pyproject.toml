@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "phrappy"
-version = "0.0.1"
+version = "0.1.0"
 description = "Unofficial typed Python Client for the Phrase TMS (Memsource) API."
 readme = "README.md"
 authors = [{ name = "Henrik Kühnemann", email = "hk@yellownape.se" }]
@@ -31,7 +31,7 @@ Homepage = "https://github.com/kuhnemann/phrappy"
 
 
 [tool.bumpver]
-current_version = "0.0.1"
+current_version = "0.1.0"
 version_pattern = "MAJOR.MINOR.PATCH"
 commit_message = "bump version {old_version} -> {new_version}"
 commit = true
