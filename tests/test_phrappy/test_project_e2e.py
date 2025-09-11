@@ -3,9 +3,10 @@ from logging import getLogger
 
 from phrappy import cdh_generator
 from phrappy.models import (
-    PatchProjectDto, IdReference, AddTargetLangDto, SetProjectStatusDto, BuyerStatusEnum,
+    PatchProjectDto, IdReference, AddTargetLangDto, SetProjectStatusDto,
     SearchTMRequestDto, UidReference, JobPartReferences, SetTermBaseDto,
     SetProjectTransMemoriesV3Dto, SetContextTransMemoriesDtoV3Dto, SetProjectTransMemoryV3Dto, JobCreateRequestDto,
+    JobStatusEnum
 )
 
 logger = getLogger(__name__)
@@ -102,8 +103,8 @@ def test_project_e2e(client, project, test_file):
             pass
 
     # status set and revert
-    client.project.set_project_status(project.uid, SetProjectStatusDto(status=BuyerStatusEnum.COMPLETED))
-    client.project.set_project_status(project.uid, SetProjectStatusDto(status=BuyerStatusEnum.NEW))
+    client.project.set_project_status(project.uid, SetProjectStatusDto(status=JobStatusEnum.COMPLETED))
+    client.project.set_project_status(project.uid, SetProjectStatusDto(status=JobStatusEnum.NEW))
 
     # search TM (may be empty; just ensure the call works)
     _ = client.project.search_tm_segment(project.uid, SearchTMRequestDto(segment="Hello", targetLangs=["sv"]))
@@ -111,7 +112,7 @@ def test_project_e2e(client, project, test_file):
     # jobs lifecycle inside the same project
     jobs = client.job.create_job(
         project_uid=project.uid,
-        content_disposition=cdh_generator("en_test_ÄöÖÅas£223.docx"),
+        content_disposition=cdh_generator("en_test_ÄöÖÅas£223.txt"),
         file_bytes=b"two words",
         memsource=JobCreateRequestDto(targetLangs=project.targetLangs),
     )

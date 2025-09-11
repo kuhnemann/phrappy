@@ -1,12 +1,12 @@
-# tests/test_phrappy/test_project_e2e.py
 import asyncio, pytest
 from logging import getLogger
 
 from phrappy import cdh_generator
 from phrappy.models import (
-    PatchProjectDto, IdReference, AddTargetLangDto, SetProjectStatusDto, BuyerStatusEnum,
-    SearchTMRequestDto, UidReference, JobPartReferences, SetTermBaseDto,
+    PatchProjectDto, IdReference, AddTargetLangDto,
+    UidReference, JobPartReferences, SetTermBaseDto,
     SetProjectTransMemoriesV3Dto, SetContextTransMemoriesDtoV3Dto, SetProjectTransMemoryV3Dto, JobCreateRequestDto,
+    JobStatusEnum, SetProjectStatusDto
 )
 
 logger = getLogger(__name__)
@@ -58,6 +58,9 @@ async def test_project_e2e(aclient, aproject, test_file):
     _ = await aclient.project.get_quotes_for_project(aproject.uid)
     _ = await aclient.project.list_by_project_v3(aproject.uid)
 
+    await aclient.project.set_project_status(aproject.uid, SetProjectStatusDto(status=JobStatusEnum.COMPLETED))
+    await aclient.project.set_project_status(aproject.uid, SetProjectStatusDto(status=JobStatusEnum.NEW))
+
     await aclient.project.add_target_language_to_project(aproject.uid, AddTargetLangDto(targetLangs=["nb"]))
 
     me = await aclient.authentication.who_am_i()
@@ -66,7 +69,7 @@ async def test_project_e2e(aclient, aproject, test_file):
 
     jobs = await aclient.job.create_job(
         project_uid=aproject.uid,
-        content_disposition=cdh_generator("en_test_ÄöÖÅas£223.docx"),
+        content_disposition=cdh_generator("en_test_ÄöÖÅas£223.txt"),
         file_bytes=b"two words",
         memsource=JobCreateRequestDto(targetLangs=aproject.targetLangs),
     )

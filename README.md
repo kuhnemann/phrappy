@@ -36,6 +36,20 @@ login_response = pp.authentication.login(LoginDto(
 token = login_response.token
 pp.close()
 ```
+All typed methods also accept dict inputs that are then validated under the hood. For example:
+```python
+from phrappy import Phrappy
+
+
+pp = Phrappy()
+login_response = pp.authentication.login({
+    "userName":"your_name",
+    "password":"<password>"
+})
+token = login_response.token
+pp.close()
+```
+
 Or use the convenience method for authenticating and getting a Phrappy instance that carries its token. 
 ```python
 from phrappy import Phrappy
@@ -146,11 +160,15 @@ Env vars used by live tests:
 - Complete the test suite
 - Streaming uploads/downloads
 - Convenience functions for AsyncJob interactions
+- Toggle for type validation / raw dict input/output
 
 
 ---
 
 ## Release notes
+
+### 0.2.0
+- Improved naming of anonymous enums that are declared inline in schemas, when hoisted into separate models.  
 
 ### 0.1.0
 - Complete rewrite of build pipeline with fully automated and repeatable builds.
