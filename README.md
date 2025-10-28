@@ -1,10 +1,9 @@
-from phrappy import Phrappy
-
-# phrappy
+# phrappy 
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/phrappy?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=downloads)](https://pepy.tech/projects/phrappy)
 
 Typed, batteries-included Python client for **Phrase TMS (Memsource)** generated from the public OpenAPI spec. Comes with both sync and async clients, fully equipped with first-class Pydantic v2 models.
 
-The build process is fully automated and project release is planned to follow the Phrase TMS bi-weekly release cadence. 
+The build process is fully automated and project release is planned to follow the Phrase TMS bi-weekly release cadence.
 
 > This project is **not** an official Phrase/Memsource SDK. Official documentation can be found at [developers.phrase.com](https://developers.phrase.com/en/api/tms/latest/introduction)
 
@@ -166,9 +165,11 @@ Env vars used by live tests:
 ---
 
 ## Release notes
+### 0.3.0 
+- Models and operations as of Phrase TMS v25.21 per 28/10 2025. Fixed alias handling. 
 
 ### 0.2.0
-- Improved naming of anonymous enums that are declared inline in schemas, when hoisted into separate models.  
+- Improved naming of enums that are hoisted from schema inline anonymous declarations.  
 
 ### 0.1.0
 - Complete rewrite of build pipeline with fully automated and repeatable builds.

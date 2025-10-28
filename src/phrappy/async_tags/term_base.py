@@ -7,6 +7,7 @@ if TYPE_CHECKING:
     from ..async_client import AsyncPhrappy
 
 from ..models import (
+    AsyncRequestWrapperV2Dto,
     BackgroundTasksTbDto,
     BrowseRequestDto,
     BrowseResponseListDto,
@@ -924,7 +925,7 @@ class TermBaseOperations:
         strict_lang_matching: Optional[bool] = False,
         update_terms: Optional[bool] = True,
         phrase_token: Optional[str] = None,
-    ) -> bytes:
+    ) -> AsyncRequestWrapperV2Dto:
         """
         Operation id: importTermBaseV2
         Upload term base
@@ -941,9 +942,7 @@ class TermBaseOperations:
 
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
-        !!! N.B.: API docs have no 200 range response declared, so falling back to returning the raw bytes from the API response.
-
-        :return: bytes
+        :return: AsyncRequestWrapperV2Dto
         """
 
         endpoint = f"/api2/v2/termBases/{term_base_uid}/upload"
@@ -981,7 +980,7 @@ class TermBaseOperations:
             content=content,
         )
 
-        return await r.aread()
+        return AsyncRequestWrapperV2Dto.model_validate(r.json())
 
     async def list_concepts(
         self,

@@ -10,7 +10,7 @@ from ..models import (
     LqaProfileDetailDto,
     LqaProfileReferenceDto,
     PageDtoLqaProfileReferenceDto,
-    PageDtoUserReference2,
+    PageDtoUserReference,
     QualityAssuranceBatchRunDtoV3,
     QualityAssuranceChecksDtoV2,
     QualityAssuranceChecksDtoV4,
@@ -501,7 +501,7 @@ class QualityAssuranceOperations:
         page_number: Optional[int] = 0,
         page_size: Optional[int] = 20,
         phrase_token: Optional[str] = None,
-    ) -> PageDtoUserReference2:
+    ) -> PageDtoUserReference:
         """
         Operation id: getLqaProfileAuthorsV2
         Get list of LQA profile authors
@@ -511,7 +511,7 @@ class QualityAssuranceOperations:
 
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
-        :return: PageDtoUserReference2
+        :return: PageDtoUserReference
         """
 
         endpoint = "/api2/v2/lqa/profiles/authors"
@@ -535,7 +535,7 @@ class QualityAssuranceOperations:
             content=content,
         )
 
-        return PageDtoUserReference2.model_validate(r.json())
+        return PageDtoUserReference.model_validate(r.json())
 
     async def get_lqa_profile_default_values(
         self,

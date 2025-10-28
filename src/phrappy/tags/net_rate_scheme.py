@@ -6,6 +6,7 @@ if TYPE_CHECKING:
     from ..client import Phrappy
 
 from ..models import (
+    CreateEditDiscountSchemeDto,
     DiscountSchemeCreateDto,
     NetRateScheme,
     NetRateSchemeEdit,
@@ -102,6 +103,53 @@ class NetRateSchemeOperations:
 
         return NetRateScheme.model_validate(r.json())
 
+    def create_discount_scheme_v2(
+        self,
+        create_edit_discount_scheme_dto: Optional[
+            CreateEditDiscountSchemeDto | dict
+        ] = None,
+        phrase_token: Optional[str] = None,
+    ) -> NetRateScheme:
+        """
+        Operation id: createDiscountSchemeV2
+        Create net rate scheme
+
+        :param create_edit_discount_scheme_dto: Optional[CreateEditDiscountSchemeDto | dict] = None (optional), body.
+
+        :param phrase_token: string (optional) - if not supplied, client will look for token from init
+
+        :return: NetRateScheme
+        """
+
+        endpoint = "/api2/v2/netRateSchemes"
+        if type(create_edit_discount_scheme_dto) is dict:
+            create_edit_discount_scheme_dto = (
+                CreateEditDiscountSchemeDto.model_validate(
+                    create_edit_discount_scheme_dto
+                )
+            )
+
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
+        files = None
+        content = None
+        payload = create_edit_discount_scheme_dto
+
+        r = self.client.make_request(
+            "POST",
+            endpoint,
+            phrase_token,
+            params=params,
+            payload=payload,
+            files=files,
+            headers=headers,
+            content=content,
+        )
+
+        return NetRateScheme.model_validate(r.json())
+
     def delete_discount_scheme(
         self,
         net_rate_scheme_uid: str,
@@ -142,6 +190,55 @@ class NetRateSchemeOperations:
         )
 
         return r.content
+
+    def edit_discount_scheme_v2(
+        self,
+        net_rate_scheme_uid: str,
+        create_edit_discount_scheme_dto: Optional[
+            CreateEditDiscountSchemeDto | dict
+        ] = None,
+        phrase_token: Optional[str] = None,
+    ) -> NetRateScheme:
+        """
+        Operation id: editDiscountSchemeV2
+        Edit net rate scheme
+
+        :param net_rate_scheme_uid: str (required), path.
+        :param create_edit_discount_scheme_dto: Optional[CreateEditDiscountSchemeDto | dict] = None (optional), body.
+
+        :param phrase_token: string (optional) - if not supplied, client will look for token from init
+
+        :return: NetRateScheme
+        """
+
+        endpoint = f"/api2/v2/netRateSchemes/{net_rate_scheme_uid}"
+        if type(create_edit_discount_scheme_dto) is dict:
+            create_edit_discount_scheme_dto = (
+                CreateEditDiscountSchemeDto.model_validate(
+                    create_edit_discount_scheme_dto
+                )
+            )
+
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
+        files = None
+        content = None
+        payload = create_edit_discount_scheme_dto
+
+        r = self.client.make_request(
+            "PUT",
+            endpoint,
+            phrase_token,
+            params=params,
+            payload=payload,
+            files=files,
+            headers=headers,
+            content=content,
+        )
+
+        return NetRateScheme.model_validate(r.json())
 
     def edit_discount_scheme_workflow_step(
         self,

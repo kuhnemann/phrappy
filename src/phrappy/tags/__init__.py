@@ -29,13 +29,13 @@ from .net_rate_scheme import NetRateSchemeOperations
 from .notifications import NotificationsOperations
 from .price_list import PriceListOperations
 from .project_template import ProjectTemplateOperations
+from .project_reference_file import ProjectReferenceFileOperations
 from .term_base import TermBaseOperations
 from .translation_memory import TranslationMemoryOperations
 from .project import ProjectOperations
 from .translation import TranslationOperations
 from .segment import SegmentOperations
 from .provider import ProviderOperations
-from .project_reference_file import ProjectReferenceFileOperations
 from .quote import QuoteOperations
 from .scim import SCIMOperations
 from .segmentation_rules import SegmentationRulesOperations
@@ -82,13 +82,13 @@ __all__ = [
     "NotificationsOperations",
     "PriceListOperations",
     "ProjectTemplateOperations",
+    "ProjectReferenceFileOperations",
     "TermBaseOperations",
     "TranslationMemoryOperations",
     "ProjectOperations",
     "TranslationOperations",
     "SegmentOperations",
     "ProviderOperations",
-    "ProjectReferenceFileOperations",
     "QuoteOperations",
     "SCIMOperations",
     "SegmentationRulesOperations",

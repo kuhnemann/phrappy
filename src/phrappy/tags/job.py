@@ -384,9 +384,9 @@ class JobOperations:
 
     def create_job(
         self,
+        memsource: JobCreateRequestDto | dict,
         project_uid: str,
         content_disposition: Optional[str] = None,
-        memsource: Optional[JobCreateRequestDto | dict] = None,
         file_bytes: Optional[bytes] = None,
         phrase_token: Optional[str] = None,
     ) -> JobListDto:
@@ -535,9 +535,9 @@ class JobOperations:
         }
         ```
 
+        :param memsource: JobCreateRequestDto | dict (required), header.
         :param project_uid: str (required), path.
-        :param content_disposition: Optional[str] = None (optional), header. must match pattern `((inline|attachment); )?(filename\\*=UTF-8''(.+)|filename="?(.+)"?)`.
-        :param memsource: Optional[JobCreateRequestDto | dict] = None (optional), header.
+        :param content_disposition: Optional[str] = None (optional), header. Required when `remoteFile` is empty. Must match pattern `((inline|attachment); )?(filename\\*=UTF-8''(.+)|filename="?(.+)"?)`.
         :param file_bytes: Optional[bytes] = None (optional), body.
 
         :param phrase_token: string (optional) - if not supplied, client will look for token from init

@@ -30,7 +30,7 @@ from ..models import (
     FileImportSettingsCreateDto,
     FileImportSettingsDto,
     FileNamingSettingsDto,
-    FinancialSettingsDto2,
+    FinancialSettingsDto,
     JobPartReferences,
     JobPartsDto,
     JobPreviewPackageDto,
@@ -1203,7 +1203,7 @@ class ProjectOperations:
         self,
         project_uid: str,
         phrase_token: Optional[str] = None,
-    ) -> FinancialSettingsDto2:
+    ) -> FinancialSettingsDto:
         """
         Operation id: getFinancialSettings
         Get financial settings
@@ -1212,7 +1212,7 @@ class ProjectOperations:
 
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
-        :return: FinancialSettingsDto2
+        :return: FinancialSettingsDto
         """
 
         endpoint = f"/api2/v1/projects/{project_uid}/financialSettings"
@@ -1236,7 +1236,7 @@ class ProjectOperations:
             content=content,
         )
 
-        return FinancialSettingsDto2.model_validate(r.json())
+        return FinancialSettingsDto.model_validate(r.json())
 
     async def get_import_settings_for_project(
         self,
@@ -2307,7 +2307,7 @@ class ProjectOperations:
         project_uid: str,
         set_financial_settings_dto: Optional[SetFinancialSettingsDto | dict] = None,
         phrase_token: Optional[str] = None,
-    ) -> FinancialSettingsDto2:
+    ) -> FinancialSettingsDto:
         """
         Operation id: setFinancialSettings
         Edit financial settings
@@ -2317,7 +2317,7 @@ class ProjectOperations:
 
         :param phrase_token: string (optional) - if not supplied, client will look for token from init
 
-        :return: FinancialSettingsDto2
+        :return: FinancialSettingsDto
         """
 
         endpoint = f"/api2/v1/projects/{project_uid}/financialSettings"
@@ -2345,7 +2345,7 @@ class ProjectOperations:
             content=content,
         )
 
-        return FinancialSettingsDto2.model_validate(r.json())
+        return FinancialSettingsDto.model_validate(r.json())
 
     async def set_mt_settings_for_project(
         self,

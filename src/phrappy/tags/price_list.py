@@ -331,6 +331,45 @@ class PriceListOperations:
 
         return r.content
 
+    def export_price_list_template(
+        self,
+        phrase_token: Optional[str] = None,
+    ) -> bytes:
+        """
+        Operation id: exportPriceListTemplate
+        Export translation price list template
+
+
+        :param phrase_token: string (optional) - if not supplied, client will look for token from init
+
+        !!! N.B.: API docs have no 200 range response declared, so falling back to returning the raw bytes from the API response.
+
+        :return: bytes
+        """
+
+        endpoint = "/api2/v1/priceLists/exportTemplate"
+
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
+        files = None
+        content = None
+        payload = None
+
+        r = self.client.make_request(
+            "GET",
+            endpoint,
+            phrase_token,
+            params=params,
+            payload=payload,
+            files=files,
+            headers=headers,
+            content=content,
+        )
+
+        return r.content
+
     def get_list_of_price_list(
         self,
         name: Optional[str] = None,

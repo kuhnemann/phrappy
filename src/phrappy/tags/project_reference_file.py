@@ -6,7 +6,10 @@ if TYPE_CHECKING:
     from ..client import Phrappy
 
 from ..models import (
+    PageDtoProjectTemplateReferenceFileReference,
     ProjectReferenceFilesRequestDto,
+    ProjectTemplateReferenceFilesDto,
+    ProjectTemplateReferenceFilesRequestDto,
     ReferenceFilePageDto,
     ReferenceFilesDto,
     UserReferencesDto,
@@ -16,6 +19,55 @@ from ..models import (
 class ProjectReferenceFileOperations:
     def __init__(self, client: Phrappy):
         self.client = client
+
+    def batch_delete_project_template_reference_files(
+        self,
+        project_template_uid: str,
+        project_template_reference_files_request_dto: Optional[
+            ProjectTemplateReferenceFilesRequestDto | dict
+        ] = None,
+        phrase_token: Optional[str] = None,
+    ) -> None:
+        """
+        Operation id: batchDeleteProjectTemplateReferenceFiles
+        Delete project template reference files (batch)
+
+        :param project_template_uid: str (required), path.
+        :param project_template_reference_files_request_dto: Optional[ProjectTemplateReferenceFilesRequestDto | dict] = None (optional), body.
+
+        :param phrase_token: string (optional) - if not supplied, client will look for token from init
+
+        :return: None
+        """
+
+        endpoint = f"/api2/v1/projectTemplates/{project_template_uid}/references"
+        if type(project_template_reference_files_request_dto) is dict:
+            project_template_reference_files_request_dto = (
+                ProjectTemplateReferenceFilesRequestDto.model_validate(
+                    project_template_reference_files_request_dto
+                )
+            )
+
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
+        files = None
+        content = None
+        payload = project_template_reference_files_request_dto
+
+        self.client.make_request(
+            "DELETE",
+            endpoint,
+            phrase_token,
+            params=params,
+            payload=payload,
+            files=files,
+            headers=headers,
+            content=content,
+        )
+
+        return
 
     def batch_delete_reference_files(
         self,
@@ -66,6 +118,57 @@ class ProjectReferenceFileOperations:
 
         return
 
+    def batch_download_project_template_reference_files(
+        self,
+        project_template_uid: str,
+        project_template_reference_files_request_dto: Optional[
+            ProjectTemplateReferenceFilesRequestDto | dict
+        ] = None,
+        phrase_token: Optional[str] = None,
+    ) -> bytes:
+        """
+        Operation id: batchDownloadProjectTemplateReferenceFiles
+        Download project template reference files (batch)
+
+        :param project_template_uid: str (required), path.
+        :param project_template_reference_files_request_dto: Optional[ProjectTemplateReferenceFilesRequestDto | dict] = None (optional), body.
+
+        :param phrase_token: string (optional) - if not supplied, client will look for token from init
+
+        :return: bytes
+        """
+
+        endpoint = (
+            f"/api2/v1/projectTemplates/{project_template_uid}/references/download"
+        )
+        if type(project_template_reference_files_request_dto) is dict:
+            project_template_reference_files_request_dto = (
+                ProjectTemplateReferenceFilesRequestDto.model_validate(
+                    project_template_reference_files_request_dto
+                )
+            )
+
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
+        files = None
+        content = None
+        payload = project_template_reference_files_request_dto
+
+        r = self.client.make_request(
+            "POST",
+            endpoint,
+            phrase_token,
+            params=params,
+            payload=payload,
+            files=files,
+            headers=headers,
+            content=content,
+        )
+
+        return r.content
+
     def batch_download_reference_files(
         self,
         project_uid: str,
@@ -114,6 +217,55 @@ class ProjectReferenceFileOperations:
         )
 
         return r.content
+
+    def create_project_template_reference_files(
+        self,
+        file: bytes,
+        project_template_uid: str,
+        filename: Optional[str] = None,
+        phrase_token: Optional[str] = None,
+    ) -> ProjectTemplateReferenceFilesDto:
+        """
+        Operation id: createProjectTemplateReferenceFiles
+        Create project template reference files
+        The `json` request part allows sending additional data as JSON, such as a text note that will be used for all the given reference files. In case no `file` parts are sent, only 1 reference is created with the given note. Either at least one file must be sent or the note must be specified. Example:
+
+        ```
+        {
+            "note": "Sample text"
+        }
+        ```
+        :param file: bytes (required), formData.
+        :param project_template_uid: str (required), path.
+
+        :param filename: Optional name for the uploaded file; defaults to field name.
+        :param phrase_token: string (optional) - if not supplied, client will look for token from init
+
+        :return: ProjectTemplateReferenceFilesDto
+        """
+
+        endpoint = f"/api2/v1/projectTemplates/{project_template_uid}/references"
+
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
+        files = {"file": (filename or "file", file)}
+        payload = None
+        content = None
+
+        r = self.client.make_request(
+            "POST",
+            endpoint,
+            phrase_token,
+            params=params,
+            payload=payload,
+            files=files,
+            headers=headers,
+            content=content,
+        )
+
+        return ProjectTemplateReferenceFilesDto.model_validate(r.json())
 
     def create_reference_files(
         self,
@@ -170,6 +322,47 @@ class ProjectReferenceFileOperations:
 
         return ReferenceFilesDto.model_validate(r.json())
 
+    def download_project_template_reference(
+        self,
+        project_template_uid: str,
+        reference_file_id: str,
+        phrase_token: Optional[str] = None,
+    ) -> bytes:
+        """
+        Operation id: downloadProjectTemplateReference
+        Download project template reference file
+
+        :param project_template_uid: str (required), path.
+        :param reference_file_id: str (required), path.
+
+        :param phrase_token: string (optional) - if not supplied, client will look for token from init
+
+        :return: bytes
+        """
+
+        endpoint = f"/api2/v1/projectTemplates/{project_template_uid}/references/{reference_file_id}"
+
+        params = {}
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
+        files = None
+        content = None
+        payload = None
+
+        r = self.client.make_request(
+            "GET",
+            endpoint,
+            phrase_token,
+            params=params,
+            payload=payload,
+            files=files,
+            headers=headers,
+            content=content,
+        )
+
+        return r.content
+
     def download_reference(
         self,
         project_uid: str,
@@ -210,6 +403,61 @@ class ProjectReferenceFileOperations:
         )
 
         return r.content
+
+    def list_project_template_reference_files(
+        self,
+        project_template_uid: str,
+        filename: Optional[str] = None,
+        order: Optional[str] = "ASC",
+        page_number: Optional[int] = 0,
+        page_size: Optional[int] = 50,
+        sort: Optional[str] = "ID",
+        phrase_token: Optional[str] = None,
+    ) -> PageDtoProjectTemplateReferenceFileReference:
+        """
+        Operation id: listProjectTemplateReferenceFiles
+        List project template reference files
+
+        :param project_template_uid: str (required), path.
+        :param filename: Optional[str] = None (optional), query.
+        :param order: Optional[str] = "ASC" (optional), query.
+        :param page_number: Optional[int] = 0 (optional), query.
+        :param page_size: Optional[int] = 50 (optional), query.
+        :param sort: Optional[str] = "ID" (optional), query.
+
+        :param phrase_token: string (optional) - if not supplied, client will look for token from init
+
+        :return: PageDtoProjectTemplateReferenceFileReference
+        """
+
+        endpoint = f"/api2/v1/projectTemplates/{project_template_uid}/references"
+
+        params = {
+            "filename": filename,
+            "pageNumber": page_number,
+            "pageSize": page_size,
+            "sort": sort,
+            "order": order,
+        }
+
+        headers = {}
+        headers = {k: v for k, v in headers.items() if v is not None}
+        files = None
+        content = None
+        payload = None
+
+        r = self.client.make_request(
+            "GET",
+            endpoint,
+            phrase_token,
+            params=params,
+            payload=payload,
+            files=files,
+            headers=headers,
+            content=content,
+        )
+
+        return PageDtoProjectTemplateReferenceFileReference.model_validate(r.json())
 
     def list_reference_file_creators(
         self,

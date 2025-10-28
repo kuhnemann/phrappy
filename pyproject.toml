@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "phrappy"
-version = "0.2.0"
+version = "0.3.0"
 description = "Unofficial typed Python Client for the Phrase TMS (Memsource) API."
 readme = "README.md"
 authors = [{ name = "Henrik Kühnemann", email = "hk@yellownape.se" }]

@@ -41,13 +41,13 @@ from .tags import (
     NotificationsOperations,
     PriceListOperations,
     ProjectTemplateOperations,
+    ProjectReferenceFileOperations,
     TermBaseOperations,
     TranslationMemoryOperations,
     ProjectOperations,
     TranslationOperations,
     SegmentOperations,
     ProviderOperations,
-    ProjectReferenceFileOperations,
     QuoteOperations,
     SCIMOperations,
     SegmentationRulesOperations,
@@ -153,13 +153,13 @@ class Phrappy:
         self.notifications = NotificationsOperations(self)
         self.price_list = PriceListOperations(self)
         self.project_template = ProjectTemplateOperations(self)
+        self.project_reference_file = ProjectReferenceFileOperations(self)
         self.term_base = TermBaseOperations(self)
         self.translation_memory = TranslationMemoryOperations(self)
         self.project = ProjectOperations(self)
         self.translation = TranslationOperations(self)
         self.segment = SegmentOperations(self)
         self.provider = ProviderOperations(self)
-        self.project_reference_file = ProjectReferenceFileOperations(self)
         self.quote = QuoteOperations(self)
         self.scim = SCIMOperations(self)
         self.segmentation_rules = SegmentationRulesOperations(self)
@@ -218,7 +218,7 @@ class Phrappy:
         # Convert Pydantic models to dicts
         if payload is not None and not isinstance(payload, dict):
             try:
-                payload = payload.model_dump(exclude_none=True)
+                payload = payload.model_dump(exclude_none=True, by_alias=True)
             except Exception as e:
                 logger.exception("Failed to serialize payload")
                 raise PhrappyError("Failed to serialize request payload") from e
